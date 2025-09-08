@@ -25,7 +25,7 @@ const HowItWorksComponent = () => {
   ];
 
   return (
-    <section className="py-20 bg-gray-50 relative" id="how-it-works">
+    <section className="py-24 bg-gray-50 relative" id="how-it-works">
       <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Section Header */}
         <h2 className="text-4xl font-extrabold text-gray-800 mb-4">
@@ -52,7 +52,7 @@ const HowItWorksComponent = () => {
               <img
                 src={step.icon}
                 alt={step.title}
-                className="w-36 h-36 object-contain mb-6 transition-transform duration-300 group-hover:scale-110 pt-4"
+                className="w-36 h-36 object-contain mb-6 transition-transform duration-300 group-hover:scale-110"
               />
 
               {/* Title & Text */}
