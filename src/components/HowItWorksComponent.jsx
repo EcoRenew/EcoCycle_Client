@@ -36,26 +36,23 @@ const HowItWorksComponent = () => {
           recycle, earn rewards, and make a difference 🌍
         </p>
 
-        {/* Steps Grid */}
+        {/* Steps */}
         <div className="grid gap-12 md:grid-cols-3">
           {steps.map((step, index) => (
             <div
               key={step.id}
               className="group bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 flex flex-col items-center relative"
             >
-              {/* Step Number Badge */}
               <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#38af44] text-white w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-md">
                 {index + 1}
               </div>
 
-              {/* Illustration */}
               <img
                 src={step.icon}
                 alt={step.title}
                 className="w-36 h-36 object-contain mb-6 transition-transform duration-300 group-hover:scale-110"
               />
 
-              {/* Title & Text */}
               <h3 className="text-xl font-semibold text-gray-800 mb-3">
                 {step.title}
               </h3>

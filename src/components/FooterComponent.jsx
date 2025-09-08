@@ -10,9 +10,7 @@ const FooterComponent = () => {
   return (
     <footer className="bg-gray-900 text-white pt-16 pb-10 px-6 md:px-12 ">
       <div className="max-w-7xl mx-auto">
-        {/* Grid layout adjusts better on medium screens */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-          {/* Brand */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <FontAwesomeIcon
