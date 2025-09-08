@@ -52,7 +52,7 @@ const HowItWorksComponent = () => {
               <img
                 src={step.icon}
                 alt={step.title}
-                className="w-36 h-36 object-contain mb-6 transition-transform duration-300 group-hover:scale-110 pt-4"
+                className="w-36 h-36 object-contain mb-6 transition-transform duration-300 group-hover:scale-110"
               />
 
               {/* Title & Text */}

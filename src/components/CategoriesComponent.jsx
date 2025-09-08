@@ -46,10 +46,7 @@ const CategoriesComponent = () => {
   ];
 
   return (
-    <section
-      className="py-24 bg-gradient-to-b from-gray-50 to-white"
-      id="categories"
-    >
+    <section className="py-24 bg-gray-50 to-white" id="categories">
       <div className="w-full text-center px-4">
         {/* Section Header */}
         <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-6">
@@ -65,14 +62,14 @@ const CategoriesComponent = () => {
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
+              className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
             >
               {/* Image */}
-              <div className="flex justify-center items-center bg-gray-50 p-6">
+              <div className="bg-gray-50 overflow-hidden">
                 <img
                   src={cat.icon}
                   alt={cat.title}
-                  className="w-full h-60 md:h-72 lg:h-80 object-contain transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-[26rem] object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
 
