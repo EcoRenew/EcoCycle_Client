@@ -44,7 +44,6 @@ const NavbarComponent = () => {
             </a>
           </div>
 
-          {/* Right Side (User + Cart always visible) */}
           <div className="flex items-center space-x-4">
             <button className="text-black hover:text-gray-500">
               <FontAwesomeIcon icon={faUser} size="lg" />
