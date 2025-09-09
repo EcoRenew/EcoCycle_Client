@@ -1,20 +1,20 @@
 import React from "react";
-import Logo from "../Logo/Logo";
-import GoogleButton from "../GoogleButton/GoogleButton";
-import Divider from "../Divider/Divider";
-import FormButton from "../FormButton/FormButton";
+import Logo from "../../common/Logo/Logo";
+import GoogleButton from "../../common/GoogleButton/GoogleButton";
+import Divider from "../../common/Divider/Divider";
+import FormButton from "../../common/FormButton/FormButton";
 import AuthSideImage from "../AuthSideImage/AuthSideImage";
-import registerImg from "../../assets/register.png";
+import registerImg from "../../../assets/register.png";
 import { useFormik } from "formik";
-import { useAuth } from "../../context/AuthContext";
-import FormAlert from "../FormAlert/FormAlert";
-import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import FormAlert from "../../common/FormAlert/FormAlert";
+import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
+// import { useNavigate } from "react-router-dom";
 
 // import style from './Register.module.css'
 
 export default function Register() {
-  let navigate = useNavigate();
+  // let navigate = useNavigate();
   const { register } = useAuth();
   async function handleRegister(values, { setStatus }) {
     try {

@@ -1,16 +1,16 @@
 import React from "react";
-import GoogleButton from "../GoogleButton/GoogleButton";
-import Logo from "../Logo/Logo";
-import loginImg from "../../assets/login.png";
-import Divider from "../Divider/Divider";
+import loginImg from "../../../assets/login.png";
 import AuthSideImage from "../AuthSideImage/AuthSideImage";
 import AuthSwitchLink from "../AuthSwitchLink/AuthSwitchLink";
 import { Link } from "react-router-dom";
 import { useFormik } from "formik";
-import FormButton from "../FormButton/FormButton";
-import { useAuth } from "../../context/AuthContext";
-import FormAlert from "../FormAlert/FormAlert";
-import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
+import FormButton from "../../common/FormButton/FormButton";
+import { useAuth } from "../../../context/AuthContext";
+import FormAlert from "../../common/FormAlert/FormAlert";
+import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
+import GoogleButton from "../../common/GoogleButton/GoogleButton";
+import Logo from "../../common/Logo/Logo";
+import Divider from "../../common/Divider/Divider";
 // import style from './Login.module.css'
 
 export default function Login() {
