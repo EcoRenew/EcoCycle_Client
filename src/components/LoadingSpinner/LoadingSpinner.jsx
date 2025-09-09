@@ -6,12 +6,12 @@ export default function LoadingSpinner() {
       <button
         disabled
         type="button"
-        class="flex w-full justify-center rounded-md border border-transparent bg-[var(--login-button-color)] py-3 px-4 text-sm font-semibold text-white shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--login-button-color)] focus:ring-offset-2"
+        className="flex w-full justify-center rounded-md border border-transparent bg-[var(--login-button-color)] py-3 px-4 text-sm font-semibold text-white shadow-sm hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--login-button-color)] focus:ring-offset-2"
       >
         <svg
           aria-hidden="true"
           role="status"
-          class="inline w-4 h-4 me-3 text-white animate-spin"
+          className="inline w-4 h-4 me-3 text-white animate-spin"
           viewBox="0 0 100 101"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"

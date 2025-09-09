@@ -150,15 +150,7 @@ export default function Login() {
                   />
                 )}
               </form>
-              <div className="relative mt-6">
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 flex items-center"
-                >
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <Divider />
-              </div>
+              <Divider />
               <GoogleButton />
               <AuthSwitchLink>
                 <span>New to EcoCycle?</span>
