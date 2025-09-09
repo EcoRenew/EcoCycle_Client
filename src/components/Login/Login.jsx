@@ -1,0 +1,172 @@
+import React from "react";
+import GoogleButton from "../GoogleButton/GoogleButton";
+import Logo from "../Logo/Logo";
+import loginImg from "../../assets/login.png";
+import Divider from "../Divider/Divider";
+import AuthSideImage from "../AuthSideImage/AuthSideImage";
+import AuthSwitchLink from "../AuthSwitchLink/AuthSwitchLink";
+import { Link } from "react-router-dom";
+import { useFormik } from "formik";
+import FormButton from "../FormButton/FormButton";
+import { useAuth } from "../../context/AuthContext";
+import FormAlert from "../FormAlert/FormAlert";
+// import style from './Login.module.css'
+
+export default function Login() {
+  const { login } = useAuth();
+
+  async function handleLogin(values, { setStatus }) {
+    try {
+      const res = await login(values.email, values.password);
+      if (res.success) {
+        setStatus({ type: "success", message: res.message });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  function validateForm(values) {
+    let errors = {};
+    if (!values.email) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      errors.email = "Invalid email format";
+    }
+    if (!values.password) {
+      errors.password = "Password is required";
+    }
+    if (!/^.{8,}$/.test(values.password)) {
+      errors.password = "Password must be at least 8 characters";
+    }
+    return errors;
+  }
+
+  let formic = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validate: validateForm,
+    onSubmit: handleLogin,
+  });
+
+  return (
+    <div className="flex min-h-screen">
+      <div className="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
+        <div className="mx-auto w-full max-w-sm lg:w-96">
+          <div>
+            <Logo />
+            <p className="mt-2 text-gray-500">Log in to your account</p>
+          </div>
+          <div className="mt-8">
+            <div className="mt-6">
+              <form className="space-y-6" onSubmit={formic.handleSubmit}>
+                <div>
+                  <label
+                    className="block text-sm font-medium text-gray-700"
+                    htmlFor="email"
+                  >
+                    Email
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      className="block w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-3 placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
+                      id="email"
+                      name="email"
+                      value={formic.values.email}
+                      onChange={formic.handleChange}
+                      onBlur={formic.handleBlur}
+                      placeholder="Enter your email"
+                      required=""
+                      type="email"
+                    />
+                  </div>
+                </div>
+                {formic.errors.email && formic.touched.email ? (
+                  <FormAlert message={formic.errors.email} />
+                ) : null}
+                <div className="space-y-1">
+                  <label
+                    className="block text-sm font-medium text-gray-700"
+                    htmlFor="password"
+                  >
+                    Password
+                  </label>
+                  <div className="mt-1">
+                    <input
+                      className="block w-full appearance-none rounded-md border border-gray-300 bg-gray-50 px-3 py-3 placeholder-gray-400 shadow-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500 sm:text-sm"
+                      id="password"
+                      name="password"
+                      value={formic.values.password}
+                      onChange={formic.handleChange}
+                      onBlur={formic.handleBlur}
+                      placeholder="Enter your password"
+                      required=""
+                      type="password"
+                    />
+                  </div>
+                  {formic.errors.password && formic.touched.password ? (
+                    <FormAlert message={formic.errors.password} />
+                  ) : null}
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                    />
+                    <label
+                      className="ml-2 block text-sm text-gray-900"
+                      htmlFor="remember-me"
+                    >
+                      Remember me
+                    </label>
+                  </div>
+                  <div className="text-sm">
+                    <a
+                      className="font-medium text-primary-600 hover:text-primary-500"
+                      href="#"
+                    >
+                      Forgot your password?
+                    </a>
+                  </div>
+                </div>
+
+                <FormButton>log in</FormButton>
+                {formic.status && (
+                  <FormAlert
+                    message={formic.status.message}
+                    type={formic.status.type}
+                  />
+                )}
+              </form>
+              <div className="relative mt-6">
+                <div
+                  aria-hidden="true"
+                  className="absolute inset-0 flex items-center"
+                >
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <Divider />
+              </div>
+              <GoogleButton />
+              <AuthSwitchLink>
+                <span>New to EcoCycle?</span>
+                {/* <Link
+                  to=""
+                  className="font-medium text-primary-600 hover:text-primary-500"
+                >
+                  Register now
+                </Link> */}
+              </AuthSwitchLink>
+            </div>
+          </div>
+        </div>
+      </div>
+      <AuthSideImage src={loginImg} alt="Inside of a recycling factory" />
+    </div>
+  );
+}
