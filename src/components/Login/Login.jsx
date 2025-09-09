@@ -10,6 +10,7 @@ import { useFormik } from "formik";
 import FormButton from "../FormButton/FormButton";
 import { useAuth } from "../../context/AuthContext";
 import FormAlert from "../FormAlert/FormAlert";
+import LoadingSpinner from "../LoadingSpinner/LoadingSpinner";
 // import style from './Login.module.css'
 
 export default function Login() {
@@ -20,6 +21,8 @@ export default function Login() {
       const res = await login(values.email, values.password);
       if (res.success) {
         setStatus({ type: "success", message: res.message });
+      } else {
+        setStatus({ type: "error", message: res.message });
       }
     } catch (error) {
       console.log(error);
@@ -134,8 +137,12 @@ export default function Login() {
                     </a>
                   </div>
                 </div>
+                {formic.isSubmitting ? (
+                  <LoadingSpinner />
+                ) : (
+                  <FormButton>log in</FormButton>
+                )}
 
-                <FormButton>log in</FormButton>
                 {formic.status && (
                   <FormAlert
                     message={formic.status.message}

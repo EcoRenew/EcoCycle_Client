@@ -19,7 +19,8 @@ export function AuthProvider({ children }) {
       localStorage.setItem("token", token);
       return { success: true, message };
     } catch (error) {
-      console.log(error);
+      const { message } = error.response.data;
+      return { success: false, message };
     }
   }
 
