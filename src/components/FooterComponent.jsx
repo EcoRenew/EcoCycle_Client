@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const FooterComponent = () => {
   return (
-    <footer className=" bg-[#112117] dark:bg-bg text-white pt-16 pb-10 px-6 md:px-12 ">
+    <footer className=" bg-[#1B3124] dark:bg-bg text-white pt-16 pb-10 px-6 md:px-12 ">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="flex flex-col gap-4">
@@ -106,7 +106,7 @@ const FooterComponent = () => {
                 placeholder="Enter your email"
                 className="w-full px-4 py-2 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#38af44] text-sm md:text-base"
               />
-              <button className="bg-[#38af44] px-4 py-2 md:px-5 md:py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300 text-sm md:text-base">
+              <button className="bg-ecoGreen px-4 py-2 md:px-5 md:py-2 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300 text-sm md:text-base">
                 Subscribe
               </button>
             </form>
