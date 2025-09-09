@@ -28,19 +28,19 @@ const NavbarComponent = () => {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-6">
-            <a href="#about" className="hover:text-gray-500">
+            <a href="#" className="hover:text-gray-500">
               About
             </a>
-            <a href="#contact" className="hover:text-gray-500">
+            <a href="#" className="hover:text-gray-500">
               Contact
             </a>
-            <a href="#donation" className="hover:text-gray-500">
+            <a href="#" className="hover:text-gray-500">
               Donation
             </a>
-            <a href="#recycle" className="hover:text-gray-500">
+            <a href="#" className="hover:text-gray-500">
               Recycle
             </a>
-            <a href="#diy" className="hover:text-gray-500">
+            <a href="#" className="hover:text-gray-500">
               DIY
             </a>
           </div>
@@ -83,31 +83,31 @@ const NavbarComponent = () => {
           {/* Menu Links */}
           <div className="flex flex-col space-y-4 px-6">
             <a
-              href="#about"
+              href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               About
             </a>
             <a
-              href="#contact"
+              href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Contact
             </a>
             <a
-              href="#donation"
+              href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Donation
             </a>
             <a
-              href="#recycle"
+              href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Recycle
             </a>
             <a
-              href="#diy"
+              href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               DIY
