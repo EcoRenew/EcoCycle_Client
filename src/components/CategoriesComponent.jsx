@@ -46,13 +46,13 @@ const CategoriesComponent = () => {
   ];
 
   return (
-    <section className="py-24 bg-gray-50 to-white" id="categories">
+    <section className="py-24  " id="categories">
       <div className="w-full text-center px-4">
         {/* Section Header */}
-        <h2 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-6">
+        <h2 className="text-4xl md:text-5xl font-extrabold  mb-6">
           ♻️ What We Collect
         </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto mb-16 text-lg">
+        <p className=" max-w-2xl mx-auto mb-16 text-lg">
           We collect various types of recyclable materials to ensure they are
           reused responsibly.
         </p>
@@ -62,7 +62,7 @@ const CategoriesComponent = () => {
           {categories.map((cat) => (
             <div
               key={cat.id}
-              className="group rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
+              className="group dark:bg-[#1B3124] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
             >
               {/* Image */}
               <div className="bg-gray-50 overflow-hidden">
@@ -75,12 +75,10 @@ const CategoriesComponent = () => {
 
               {/* Title & Text */}
               <div className="p-8 text-center relative z-10">
-                <h3 className="text-xl font-bold text-gray-800 mb-3 group-hover:text-ecoGreen transition-colors duration-300">
+                <h3 className="text-xl font-bold  mb-3 group-hover:text-ecoGreen transition-colors duration-300">
                   {cat.title}
                 </h3>
-                <p className="text-gray-600 text-base leading-relaxed">
-                  {cat.text}
-                </p>
+                <p className=" text-base leading-relaxed">{cat.text}</p>
               </div>
             </div>
           ))}
