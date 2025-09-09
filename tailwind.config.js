@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
@@ -9,10 +10,12 @@ export default {
         poppins: ["'Poppins'", "sans-serif"],
       },
       colors: {
-        ecoGreen: "#38af44",
+        ecoGreen: "#38af44", // your custom green
+        bg: "var(--bg)", // background variable
+        text: "var(--text)", // text variable
       },
       animation: {
-        "spin-slow": "spin 3s linear infinite", // 5 seconds per rotation
+        "spin-slow": "spin 3s linear infinite",
       },
     },
   },

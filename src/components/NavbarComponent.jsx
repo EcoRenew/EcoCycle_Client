@@ -7,6 +7,7 @@ import {
   faShoppingCart,
   faRecycle,
 } from "@fortawesome/free-solid-svg-icons";
+import ColorModeSwitch from "./ColorModeSwitch";
 
 const NavbarComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,7 +52,7 @@ const NavbarComponent = () => {
             <button className="text-black hover:text-gray-500">
               <FontAwesomeIcon icon={faShoppingCart} size="lg" />
             </button>
-
+            <ColorModeSwitch />
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <button

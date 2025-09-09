@@ -25,13 +25,11 @@ const HowItWorksComponent = () => {
   ];
 
   return (
-    <section className="py-24 bg-gray-50 relative" id="how-it-works">
+    <section className="py-24  relative" id="how-it-works">
       <div className="max-w-6xl mx-auto px-6 text-center">
         {/* Section Header */}
-        <h2 className="text-4xl font-extrabold text-gray-800 mb-4">
-          How It Works
-        </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto mb-16">
+        <h2 className="text-4xl font-extrabold  mb-4">How It Works</h2>
+        <p className="max-w-2xl mx-auto mb-16">
           Getting started is simple! Just follow these three easy steps to
           recycle, earn rewards, and make a difference 🌍
         </p>
@@ -41,7 +39,7 @@ const HowItWorksComponent = () => {
           {steps.map((step, index) => (
             <div
               key={step.id}
-              className="group bg-white rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 flex flex-col items-center relative"
+              className="group dark:bg-[#1B3124] rounded-2xl shadow-lg p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-3 flex flex-col items-center relative"
             >
               <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-[#38af44] text-white w-12 h-12 rounded-full flex items-center justify-center font-bold shadow-md">
                 {index + 1}
@@ -53,10 +51,10 @@ const HowItWorksComponent = () => {
                 className="w-36 h-36 object-contain mb-6 transition-transform duration-300 group-hover:scale-110"
               />
 
-              <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                {step.title}
-              </h3>
-              <p className="text-gray-600 leading-relaxed">{step.text}</p>
+              <h3 className="text-xl font-semibold  mb-3">{step.title}</h3>
+              <p className="text-gray-600 dark:text-slate-300 leading-relaxed">
+                {step.text}
+              </p>
             </div>
           ))}
         </div>

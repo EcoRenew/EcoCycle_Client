@@ -8,7 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const FooterComponent = () => {
   return (
-    <footer className="bg-gray-900 text-white pt-16 pb-10 px-6 md:px-12 ">
+    <footer className=" bg-[#112117] dark:bg-bg text-white pt-16 pb-10 px-6 md:px-12 ">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           <div className="flex flex-col gap-4">
@@ -30,7 +30,7 @@ const FooterComponent = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-bold text-[#38af44] mb-4">
+            <h3 className="text-lg font-bold text-ecoGreen mb-4">
               Quick Links
             </h3>
             <ul className="space-y-3">
@@ -94,7 +94,7 @@ const FooterComponent = () => {
 
           {/* Newsletter */}
           <div>
-            <h3 className="text-lg font-bold text-[#38af44] mb-4">
+            <h3 className="text-lg font-bold text-ecoGreen mb-4">
               Stay Updated
             </h3>
             <p className="text-slate-300 mb-4">

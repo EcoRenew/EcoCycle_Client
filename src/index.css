@@ -5,3 +5,20 @@
 body {
   @apply font-poppins;
 }
+.light body {
+  @apply bg-bg text-black transition-colors duration-300;
+}
+
+/* 🌙 Dark mode */
+.dark body {
+  @apply bg-bg text-white transition-colors duration-300;
+}
+
+.light {
+  --bg: #f8fafc; /* light mode background (gray-50) */
+  --text: #000000; /* light mode text */
+}
+.dark {
+  --bg: #112117; /* dark mode background (slate-900) */
+  --text: #ffffff; /* dark mode text */
+}
