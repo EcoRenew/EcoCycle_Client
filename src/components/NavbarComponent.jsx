@@ -40,6 +40,9 @@ const NavbarComponent = () => {
             <a href="#" className="hover:text-gray-500">
               Recycle
             </a>
+            <a href="/faq" className="hover:text-gray-500">
+              FAQs
+            </a>
             <a href="#" className="hover:text-gray-500">
               DIY
             </a>
@@ -105,6 +108,12 @@ const NavbarComponent = () => {
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Recycle
+            </a>
+            <a
+              href="/faq"
+              className="text-lg text-black dark:text-white hover:text-gray-500"
+            >
+              FAQs
             </a>
             <a
               href="#"
