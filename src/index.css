@@ -22,3 +22,17 @@ body {
   --bg: #112117; /* dark mode background (slate-900) */
   --text: #ffffff; /* dark mode text */
 }
+:root {
+  --primary-50: #f0fdf4;
+  --primary-100: #dcfce7;
+  --primary-200: #bbf7d0;
+  --primary-300: #86efac;
+  --primary-400: #4ade80;
+  --primary-500: #22c55e;
+  --primary-600: #16a34a;
+  --primary-700: #15803d;
+  --primary-800: #166534;
+  --primary-900: #14532d;
+  --primary-950: #052e16;
+  --login-button-color: #38af44;
+}
