@@ -19,7 +19,7 @@ export default function Register() {
       const res = await register(values.name, values.email, values.password);
       if (res.success) {
         setStatus({ type: "success", message: res.message });
-        navigate("/login");
+        // navigate("/login");
       } else {
         setStatus({ type: "error", message: res.message });
       }
