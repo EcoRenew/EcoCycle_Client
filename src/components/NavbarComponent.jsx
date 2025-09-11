@@ -35,6 +35,9 @@ const NavbarComponent = () => {
               Contact
             </a>
             <a href="#" className="hover:text-gray-500">
+              Store
+            </a>
+            <a href="#" className="hover:text-gray-500">
               Donation
             </a>
             <a href="#" className="hover:text-gray-500">
@@ -93,6 +96,12 @@ const NavbarComponent = () => {
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Contact
+            </a>
+            <a
+              href="#"
+              className="text-lg text-black dark:text-white hover:text-gray-500"
+            >
+              Store
             </a>
             <a
               href="#"

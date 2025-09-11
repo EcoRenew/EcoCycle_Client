@@ -37,12 +37,6 @@ const CategoriesComponent = () => {
       title: "Cooking Oil",
       text: "Used cooking oil, collected and recycled safely.",
     },
-    {
-      id: 6,
-      icon: Cardboard,
-      title: "Cardboard",
-      text: "Recyclable cardboard boxes and packaging materials.",
-    },
   ];
 
   return (
