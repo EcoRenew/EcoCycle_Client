@@ -1,16 +1,16 @@
 import axios from "axios";
 import { createContext, useContext, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
 
   async function register(name, email, password) {
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/users/register", {
+      const res = await axios.post(`${API_URL}/api/users/register`, {
         name,
         email,
         password,
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
 
   async function login(email, password) {
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/users/login", {
+      const res = await axios.post(`${API_URL}/api/users/login`, {
         email,
         password,
       });

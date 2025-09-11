@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 /Template
 generate-react-cli.json
+.env
+.env.*
+
