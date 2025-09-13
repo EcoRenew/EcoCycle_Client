@@ -43,6 +43,9 @@ const NavbarComponent = () => {
             <a href="/faq" className="hover:text-gray-500">
               FAQs
             </a>
+            <a href="/events" className="hover:text-gray-500">
+              Events
+            </a>
             <a href="#" className="hover:text-gray-500">
               DIY
             </a>
@@ -114,6 +117,12 @@ const NavbarComponent = () => {
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               FAQs
+            </a>
+            <a
+              href="/events"
+              className="text-lg text-black dark:text-white hover:text-gray-500"
+            >
+              Events
             </a>
             <a
               href="#"
