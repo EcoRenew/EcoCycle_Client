@@ -1,5 +1,3 @@
-// src/components/ProductsList.jsx
-import React from "react";
 import ProductCard from "./ProductCard";
 
 const ProductsList = ({ products }) => {

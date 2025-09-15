@@ -3,12 +3,19 @@ import ProductList from "../components/ProductsList";
 import Header from "../assets/storeHeader.png";
 import { useProducts } from "../hooks/useProducts";
 const StorePage = () => {
-  const { products, loading } = useProducts();
+  const { products, loading, error } = useProducts();
 
   if (loading) {
     return <p className="text-center text-lg">Loading products...</p>;
   }
 
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-red-500 text-lg">Failed to load products.</p>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen ">
       {/* Banner Section */}
@@ -30,7 +37,6 @@ const StorePage = () => {
         </div>
       </header>
 
-      {/* Products Section (full width, not aligned with banner) */}
       <main>
         <ProductList products={products} />
       </main>
