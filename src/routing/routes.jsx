@@ -10,6 +10,8 @@ import CategoryPage from "../pages/CategoryPage";
 import EventsPage from "../pages/EventsPage";
 
 import PartnersPage from "../pages/PartnersPage";
+import AboutPage from "../pages/AboutPage";
+import ContactPage from "../pages/ContactPage";
 
 const router = createBrowserRouter([
   {
@@ -19,6 +21,8 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "store", element: <StorePage /> },
+      { path: "about", element: <AboutPage /> },
+      { path: "contact", element: <ContactPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "faq", element: <FAQPage /> },
