@@ -22,7 +22,7 @@ const CategoriesComponent = () => {
     {
       id: 3,
       icon: Paper,
-      title: "Papers",
+      title: "Paper",
       text: "Newspapers, cardboard, office paper, and magazines.",
     },
     {

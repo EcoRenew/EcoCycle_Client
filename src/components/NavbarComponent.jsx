@@ -17,14 +17,16 @@ const NavbarComponent = () => {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <FontAwesomeIcon
-              icon={faRecycle}
-              className="text-ecoGreen animate-spin-slow"
-              size="2x"
-            />
-            <div className="text-2xl font-bold">EcoCycle</div>
-          </div>
+          <a href="/" className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <FontAwesomeIcon
+                icon={faRecycle}
+                className="text-ecoGreen animate-spin-slow"
+                size="2x"
+              />
+              <div className="text-2xl font-bold">EcoCycle</div>
+            </div>
+          </a>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex space-x-6">
@@ -34,7 +36,7 @@ const NavbarComponent = () => {
             <a href="#" className="hover:text-gray-500">
               Contact
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="/store" className="hover:text-gray-500">
               Store
             </a>
             <a href="#" className="hover:text-gray-500">
