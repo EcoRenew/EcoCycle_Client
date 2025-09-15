@@ -55,17 +55,17 @@ export default function Register() {
     onSubmit: handleRegister,
   });
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden dark:text-white">
       <div className="flex-grow">
         <div className="grid md:grid-cols-2 min-h-screen">
           <div className="flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-20 xl:px-24">
-            <div className="mx-auto w-full max-w-sm lg:w-96">
+            <div className="mx-auto w-full max-w-sm lg:w-96 ">
               <div>
                 <Logo />
-                <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+                <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white ">
                   Create your EcoCycle account
                 </h2>
-                <p className="mt-2 text-sm text-gray-600">
+                <p className="mt-2 text-sm text-gray-600 dark:text-white/60">
                   Join the community and start making a difference.
                 </p>
               </div>
@@ -143,7 +143,7 @@ export default function Register() {
                       />
                     )}
                   </form>
-                  <p className="mt-4 text-center text-sm text-gray-600">
+                  <p className="mt-4 text-center text-sm text-gray-600 dark:text-white/60">
                     Already have an account?
                     <a
                       className="font-medium text-primary-600 hover:text-primary-500"

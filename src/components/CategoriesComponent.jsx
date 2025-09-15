@@ -1,11 +1,9 @@
 import Plastic from "../assets/plastic.png";
 import Metal from "../assets/metal.png";
-import Paper from "../assets/paper.png";
 import Electronics from "../assets/electronics.png";
 import Oil from "../assets/oil.png";
 import paperCartoon from "../assets/carton.png";
 import { Link } from "react-router-dom";
-
 
 const CategoriesComponent = () => {
   const categories = [
@@ -56,7 +54,11 @@ const CategoriesComponent = () => {
         {/* Categories  */}
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 px-4 md:px-10">
           {categories.map((cat) => (
-            <Link to={`/category/${cat.title.toLowerCase().replace(" & ", "_").replace(" ", "_")}`}
+            <Link
+              to={`/category/${cat.title
+                .toLowerCase()
+                .replace(" & ", "_")
+                .replace(" ", "_")}`}
               key={cat.id}
               className="group dark:bg-[#1B3124] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
             >

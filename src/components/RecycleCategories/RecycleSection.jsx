@@ -4,7 +4,7 @@ const RecycleSection = ({ heading, description, videoUrl }) => {
       <div className="container mx-auto px-4 flex flex-col lg:flex-row gap-10 items-center">
         <div className="flex-1">
           <h2 className="text-3xl font-bold text-green-800 mb-4">{heading}</h2>
-          <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line">
+          <p className="text-gray-700 dark:text-gray-500 leading-relaxed text-base whitespace-pre-line">
             {description}
           </p>
         </div>
