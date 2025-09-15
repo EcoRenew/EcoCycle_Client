@@ -6,6 +6,9 @@ import StorePage from "../pages/StorePage";
 import Register from "../components/auth/Register/Register";
 import Login from "../components/auth/Login/Login";
 import FAQPage from "../pages/FAQPage";
+import CategoryPage from "../pages/CategoryPage";
+import EventsPage from "../pages/EventsPage";
+import PartnersPage from "../pages/PartnersPage";
 import EventsPage from "../pages/EventsPage";
 import PartnersPage from "../pages/PartnersPage";
 
@@ -20,6 +23,7 @@ const router = createBrowserRouter([
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "faq", element: <FAQPage /> },
+      { path: "category/:type", element: <CategoryPage /> },
       { path: "events", element: <EventsPage /> },
       { path: "partners", element: <PartnersPage /> },
     ],
