@@ -35,18 +35,19 @@ const FooterComponent = () => {
             </h3>
             <ul className="space-y-3">
               {[
-                "How It Works",
-                "What to Recycle",
-                "Find a Center",
-                "About Us",
-                "Contact Us",
+                { name: "How It Works", href: "#how-it-works" },
+                { name: "What to Recycle", href: "#recycle" },
+                { name: "Find a Center", href: "#centers" },
+                { name: "Partners", href: "/partners" },
+                { name: "About Us", href: "#about" },
+                { name: "Contact Us", href: "#contact" },
               ].map((link, idx) => (
                 <li key={idx}>
                   <a
                     className="text-slate-300 hover:text-white transition-colors duration-300"
-                    href="#"
+                    href={link.href}
                   >
-                    {link}
+                    {link.name}
                   </a>
                 </li>
               ))}
