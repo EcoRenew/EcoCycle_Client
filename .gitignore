@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+/Template
+generate-react-cli.json
+.env
+.env.*
+

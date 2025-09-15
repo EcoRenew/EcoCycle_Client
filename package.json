@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "generate": "npx generate-react-cli component",
+    "start": "npm run dev",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,7 +16,9 @@
     "@fortawesome/free-brands-svg-icons": "^7.0.1",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",
-    "axios": "^1.12.2",
+    "axios": "^1.11.0",
+    "formic": "^0.0.10",
+    "formik": "^2.4.6",
     "lucide-react": "^0.542.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
