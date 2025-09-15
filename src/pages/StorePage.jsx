@@ -1,8 +1,14 @@
 import React from "react";
 import ProductList from "../components/ProductsList";
 import Header from "../assets/storeHeader.png";
-
+import { useProducts } from "../hooks/useProducts";
 const StorePage = () => {
+  const { products, loading } = useProducts();
+
+  if (loading) {
+    return <p className="text-center text-lg">Loading products...</p>;
+  }
+
   return (
     <div className="min-h-screen ">
       {/* Banner Section */}
@@ -26,7 +32,7 @@ const StorePage = () => {
 
       {/* Products Section (full width, not aligned with banner) */}
       <main>
-        <ProductList />
+        <ProductList products={products} />
       </main>
     </div>
   );
