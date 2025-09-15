@@ -65,7 +65,7 @@ export default function Register() {
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white ">
                   Create your EcoCycle account
                 </h2>
-                <p className="mt-2 text-sm text-gray-600 dark:text-white">
+                <p className="mt-2 text-sm text-gray-600 dark:text-white/60">
                   Join the community and start making a difference.
                 </p>
               </div>
@@ -143,7 +143,7 @@ export default function Register() {
                       />
                     )}
                   </form>
-                  <p className="mt-4 text-center text-sm text-gray-600">
+                  <p className="mt-4 text-center text-sm text-gray-600 dark:text-white/60">
                     Already have an account?
                     <a
                       className="font-medium text-primary-600 hover:text-primary-500"

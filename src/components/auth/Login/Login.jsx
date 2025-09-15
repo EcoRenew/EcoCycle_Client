@@ -156,7 +156,7 @@ export default function Login() {
               <Divider />
               <GoogleButton />
               <AuthSwitchLink>
-                <span>New to EcoCycle?</span>
+                <span className="dark:text-white/60">New to EcoCycle?</span>
                 {/* <Link
                   to=""
                   className="font-medium text-primary-600 hover:text-primary-500"
