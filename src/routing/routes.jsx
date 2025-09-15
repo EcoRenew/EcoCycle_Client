@@ -7,6 +7,7 @@ import Login from "../components/auth/Login/Login";
 import FAQPage from "../pages/FAQPage";
 import EventsPage from "../pages/EventsPage";
 import PartnersPage from "../pages/PartnersPage";
+import CategoryPage from "../pages/CategoryPage";
 
 const router = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ const router = createBrowserRouter([
       { path: "faq", element: <FAQPage /> },
       { path: "events", element: <EventsPage /> },
       { path: "partners", element: <PartnersPage /> },
-
+      { path: "category/:type", element: <CategoryPage /> },
     ],
   },
 ]);
