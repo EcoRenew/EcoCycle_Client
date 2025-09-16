@@ -8,9 +8,8 @@ import FAQPage from "../pages/FAQPage";
 import EventsPage from "../pages/EventsPage";
 import PartnersPage from "../pages/PartnersPage";
 import CategoryPage from "../pages/CategoryPage";
-import EventsPage from "../pages/EventsPage";
-import PartnersPage from "../pages/PartnersPage";
-
+import DIYPage from "../pages/DIYPage";
+import CommunityPage from "../pages/CommunityPage";
 
 const router = createBrowserRouter([
   {
@@ -25,9 +24,8 @@ const router = createBrowserRouter([
       { path: "events", element: <EventsPage /> },
       { path: "partners", element: <PartnersPage /> },
       { path: "category/:type", element: <CategoryPage /> },
-      { path: "events", element: <EventsPage /> },
-      { path: "partners", element: <PartnersPage /> },
-
+      { path: "diy", element: <DIYPage /> },
+      { path: "community", element: <CommunityPage /> },
     ],
   },
 ]);
