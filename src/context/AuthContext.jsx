@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
 
   async function register(name, email, password) {
     try {
-      const res = await axios.post(`${API_URL}/api/users/register`, {
+      const res = await axios.post(`${API_URL}/users/register`, {
         name,
         email,
         password,
@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
 
   async function login(email, password) {
     try {
-      const res = await axios.post(`${API_URL}/api/users/login`, {
+      const res = await axios.post(`${API_URL}/users/login`, {
         email,
         password,
       });

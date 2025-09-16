@@ -2,13 +2,22 @@ import { useState, useEffect } from "react";
 import { CartContext } from "../context/CartContext.jsx";
 
 export default function CartProvider({ children }) {
-  // Load from localStorage on init
   const [cartItems, setCartItems] = useState(() => {
     const savedCart = localStorage.getItem("cartItems");
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
-  // Save to localStorage whenever cart changes
+  // Detect successful payment and clear cart
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("success") === "true") {
+      setCartItems([]);
+      localStorage.removeItem("cartItems");
+      //  remove the query param from URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.setItem("cartItems", JSON.stringify(cartItems));
   }, [cartItems]);
