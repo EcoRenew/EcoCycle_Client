@@ -19,7 +19,7 @@ const CollabSectionComponent = () => {
           {/* Contact Us */}
           <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
             <a
-              href="#"
+              href="/contact"
               className="px-10 py-4 border-2 border-ecoGreen text-ecoGreen font-semibold rounded-xl
              transition-all duration-300
              hover:bg-ecoGreen/10 hover:text-ecoGreen/90
@@ -29,7 +29,7 @@ const CollabSectionComponent = () => {
             </a>
 
             <a
-              href="#"
+              href="/register"
               className="px-10 py-4 bg-ecoGreen text-white font-semibold rounded-xl shadow-md hover:bg-ecoGreen/90 transition-all duration-300"
             >
               Register Your Organization
