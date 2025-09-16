@@ -68,10 +68,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
       {/* Checkout Button */}
       {cartItems.length > 0 && (
         <div className="p-4 border-t sticky bottom-0 bg-white dark:bg-[#25432E]">
-          <button
-            className="w-full py-3 bg-ecoGreen text-white font-semibold rounded-lg hover:bg-green-700 transition"
-            onClick={() => alert("Proceeding to checkout...")}
-          >
+          <button className="w-full py-3 bg-ecoGreen text-white font-semibold rounded-lg hover:bg-green-700 transition">
             Proceed to Checkout
           </button>
         </div>
