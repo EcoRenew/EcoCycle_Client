@@ -8,10 +8,12 @@ import Login from "../components/auth/Login/Login";
 import FAQPage from "../pages/FAQPage";
 import CategoryPage from "../pages/CategoryPage";
 import EventsPage from "../pages/EventsPage";
-
 import PartnersPage from "../pages/PartnersPage";
+import DIYPage from "../pages/DIYPage";
+import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
+
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,8 @@ const router = createBrowserRouter([
       { path: "category/:type", element: <CategoryPage /> },
       { path: "events", element: <EventsPage /> },
       { path: "partners", element: <PartnersPage /> },
+      { path: "diy", element: <DIYPage /> },
+      { path: "community", element: <CommunityPage /> },
     ],
   },
 ]);

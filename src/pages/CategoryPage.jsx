@@ -8,7 +8,6 @@ const CategoryPage = () => {
   const { type } = useParams();
 
   const content = categoryContent[type];
-
   if (!content)
     return <div className="text-center mt-20">Category not found</div>;
 
@@ -70,3 +69,4 @@ const CategoryPage = () => {
 };
 
 export default CategoryPage;
+
