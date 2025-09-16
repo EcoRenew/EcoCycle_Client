@@ -23,7 +23,6 @@ import DIYPage from "../pages/DIYPage";
 import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
-import UserPage from "../pages/UserPage";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +32,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "store", element: <StorePage /> },
-      { path: "about", element: <UserPage /> },
+      { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },

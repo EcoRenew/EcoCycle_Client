@@ -11,31 +11,31 @@ const CategoriesComponent = () => {
       id: 1,
       icon: Plastic,
       title: "Plastic",
-      text: "Bottles, containers, packaging, and other recyclable plastics.",
+      text: "Recycle your bottles, containers, and packaging to help reduce plastic waste.",
     },
     {
       id: 2,
       icon: Metal,
       title: "Metals",
-      text: "Cans, tins, scrap metal, and other recyclable metal products.",
+      text: "Give your cans, tins, and scrap metal a new life by recycling them here.",
     },
     {
       id: 3,
       icon: paperCartoon,
       title: "Paper & Cardboard",
-      text: "Newspapers, cardboard, office paper, and magazines.",
+      text: "Turn old newspapers, office paper, and cardboard into reusable materials.",
     },
     {
       id: 4,
       icon: Electronics,
       title: "Electronics",
-      text: "Phones, laptops, small appliances, and e-waste.",
+      text: "Safely recycle phones, laptops, and small appliances to prevent e-waste.",
     },
     {
       id: 5,
       icon: Oil,
       title: "Cooking Oil",
-      text: "Used cooking oil, collected and recycled safely.",
+      text: "Dispose of used cooking oil responsibly so it can be recycled safely.",
     },
   ];
 
@@ -43,12 +43,12 @@ const CategoriesComponent = () => {
     <section className="py-24  " id="categories">
       <div className="w-full text-center px-4">
         {/* Section Header */}
-        <h2 className="text-4xl md:text-5xl font-extrabold  mb-6">
-          ♻️ What We Collect
+        <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
+          Recycle with Us
         </h2>
-        <p className=" max-w-2xl mx-auto mb-16 text-lg">
-          We collect various types of recyclable materials to ensure they are
-          reused responsibly.
+        <p className="max-w-2xl mx-auto mb-16 text-lg text-gray-700 dark:text-gray-300">
+          Click on a category below to safely recycle your items and give them a
+          new life. Together, we can reduce waste and protect the planet.
         </p>
 
         {/* Categories  */}
@@ -60,7 +60,7 @@ const CategoriesComponent = () => {
                 .replace(" & ", "_")
                 .replace(" ", "_")}`}
               key={cat.id}
-              className="group dark:bg-[#1B3124] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
+              className="group bg-white dark:bg-[#1B3124] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
             >
               {/* Image */}
               <div className="bg-gray-50 overflow-hidden">
