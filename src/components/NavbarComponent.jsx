@@ -8,9 +8,18 @@ import {
   faRecycle,
 } from "@fortawesome/free-solid-svg-icons";
 import ColorModeSwitch from "./ColorModeSwitch";
+import CartSidebar from "./CartSidebar";
 import { Link } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
+
 const NavbarComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+
+  const { cartItems } = useCart(); // get cart items
+
+  // Total quantity
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <nav className="bg-white dark:bg-bg dark:text-white shadow-md fixed w-full top-0 left-0 z-50">
@@ -63,9 +72,20 @@ const NavbarComponent = () => {
               <FontAwesomeIcon icon={faUser} size="lg" />
             </Link>
 
-            <button className="hover:text-gray-500">
+            <button
+              className="hover:text-gray-500 relative"
+              onClick={() => setCartOpen(true)}
+            >
               <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-ecoGreen text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+                  {totalItems}
+                </span>
+              )}
             </button>
+
+            <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
             <ColorModeSwitch />
             {/* Mobile Menu Button */}
             <div className="lg:hidden">
