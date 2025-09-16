@@ -61,14 +61,16 @@ export default function Login() {
         <div className="mx-auto w-full max-w-sm lg:w-96">
           <div>
             <Logo />
-            <p className="mt-2 text-gray-500">Log in to your account</p>
+            <p className="mt-2 text-gray-500  dark:text-white">
+              Log in to your account
+            </p>
           </div>
           <div className="mt-8">
             <div className="mt-6">
               <form className="space-y-6" onSubmit={formic.handleSubmit}>
                 <div>
                   <label
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700  dark:text-white"
                     htmlFor="email"
                   >
                     Email
@@ -92,7 +94,7 @@ export default function Login() {
                 ) : null}
                 <div className="space-y-1">
                   <label
-                    className="block text-sm font-medium text-gray-700"
+                    className="block text-sm font-medium text-gray-700  dark:text-white"
                     htmlFor="password"
                   >
                     Password
@@ -123,7 +125,7 @@ export default function Login() {
                       type="checkbox"
                     />
                     <label
-                      className="ml-2 block text-sm text-gray-900"
+                      className="ml-2 block text-sm text-gray-900  dark:text-white"
                       htmlFor="remember-me"
                     >
                       Remember me
@@ -154,7 +156,7 @@ export default function Login() {
               <Divider />
               <GoogleButton />
               <AuthSwitchLink>
-                <span>New to EcoCycle?</span>
+                <span className="dark:text-white/60">New to EcoCycle?</span>
                 {/* <Link
                   to=""
                   className="font-medium text-primary-600 hover:text-primary-500"

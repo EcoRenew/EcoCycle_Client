@@ -14,7 +14,7 @@ export default function Logo() {
           fill="#38af44"
         ></path>
       </svg>
-      <h1 className="text-xl font-bold tracking-tight text-gray-800">
+      <h1 className="text-xl font-bold tracking-tight text-gray-800  dark:text-white">
         EcoCycle
       </h1>
     </div>
