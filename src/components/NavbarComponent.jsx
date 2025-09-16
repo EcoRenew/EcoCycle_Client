@@ -7,163 +7,113 @@ import {
   faShoppingCart,
   faRecycle,
 } from "@fortawesome/free-solid-svg-icons";
+import { Link } from "react-router-dom";
 import ColorModeSwitch from "./ColorModeSwitch";
 import CartSidebar from "./CartSidebar";
-import { Link } from "react-router-dom";
 import { useCart } from "../hooks/useCart";
+
+// Menu links array
+const MENU_LINKS = [
+  { name: "About", path: "/about" },
+  { name: "Contact", path: "/contact" },
+  { name: "Store", path: "/store" },
+  { name: "Donation", path: "#" },
+  { name: "FAQs", path: "/faq" },
+  { name: "Events", path: "/events" },
+  { name: "Partners", path: "/partners" },
+  { name: "DIY", path: "#" },
+];
+
+// Cart Button Component
+const CartButton = ({ onClick }) => {
+  const { cartItems } = useCart();
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  return (
+    <button className="hover:text-gray-500 relative" onClick={onClick}>
+      <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+      {totalItems > 0 && (
+        <span className="absolute -top-2 -right-2 bg-ecoGreen text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+          {totalItems}
+        </span>
+      )}
+    </button>
+  );
+};
 
 const NavbarComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 
-  const { cartItems } = useCart(); // get cart items
-
-  // Total quantity
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
   return (
     <nav className="bg-white dark:bg-bg dark:text-white shadow-md fixed w-full top-0 left-0 z-50">
-      <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <a href="/" className="flex items-center space-x-2">
-            <div className="flex items-center space-x-2">
-              <FontAwesomeIcon
-                icon={faRecycle}
-                className="text-ecoGreen animate-spin-slow"
-                size="2x"
-              />
-              <div className="text-2xl font-bold">EcoCycle</div>
-            </div>
-          </a>
+      <div className="px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+        {/* Logo */}
+        <Link to="/" className="flex items-center space-x-2">
+          <FontAwesomeIcon
+            icon={faRecycle}
+            className="text-ecoGreen animate-spin-slow"
+            size="2x"
+          />
+          <span className="text-2xl font-bold">EcoCycle</span>
+        </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden lg:flex space-x-6">
-            <a href="/about" className="hover:text-gray-500">
-              About
-            </a>
-            <a href="/contact" className="hover:text-gray-500">
-              Contact
-            </a>
-            <a href="/store" className="hover:text-gray-500">
-              Store
-            </a>
-            <a href="#" className="hover:text-gray-500">
-              Donation
-            </a>
-
-            <a href="/faq" className="hover:text-gray-500">
-              FAQs
-            </a>
-            <a href="/events" className="hover:text-gray-500">
-              Events
-            </a>
-            <a href="/partners" className="hover:text-gray-500">
-              Partners
-            </a>
-            <a href="#" className="hover:text-gray-500">
-              DIY
-            </a>
-          </div>
-
-          {/* Right Side */}
-          <div className="flex items-center space-x-4">
-            <Link to="/register" className="hover:text-gray-500">
-              <FontAwesomeIcon icon={faUser} size="lg" />
-            </Link>
-
-            <button
-              className="hover:text-gray-500 relative"
-              onClick={() => setCartOpen(true)}
+        {/* Desktop Menu */}
+        <div className="hidden lg:flex space-x-6">
+          {MENU_LINKS.map((link) => (
+            <Link
+              key={link.name}
+              to={link.path}
+              className="hover:text-gray-500"
             >
-              <FontAwesomeIcon icon={faShoppingCart} size="lg" />
+              {link.name}
+            </Link>
+          ))}
+        </div>
 
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-ecoGreen text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                  {totalItems}
-                </span>
-              )}
+        {/* Right Side */}
+        <div className="flex items-center space-x-4">
+          <Link to="/register" className="hover:text-gray-500">
+            <FontAwesomeIcon icon={faUser} size="lg" />
+          </Link>
+
+          <CartButton onClick={() => setCartOpen(true)} />
+          <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+          <ColorModeSwitch />
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="hover:text-gray-500 focus:outline-none"
+            >
+              <FontAwesomeIcon icon={isOpen ? faTimes : faBars} size="lg" />
             </button>
-
-            <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
-            <ColorModeSwitch />
-            {/* Mobile Menu Button */}
-            <div className="lg:hidden">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="hover:text-gray-500 focus:outline-none"
-              >
-                <FontAwesomeIcon icon={isOpen ? faTimes : faBars} size="lg" />
-              </button>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Fullscreen */}
+      {/* Mobile Menu */}
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 bg-white dark:bg-bg h-[100dvh] shadow-lg z-40 flex flex-col">
-          {/* Close Button */}
-          <div className="flex justify-end p-4">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="text-black dark:text-white hover:text-gray-500 focus:outline-none"
-            >
-              <FontAwesomeIcon icon={faTimes} size="lg" />
-            </button>
-          </div>
+        <div className="lg:hidden fixed inset-0 bg-white dark:bg-bg h-[100dvh] shadow-lg z-40 flex flex-col p-6">
+          <button
+            onClick={() => setIsOpen(false)}
+            className="self-end text-black dark:text-white hover:text-gray-500 mb-6"
+          >
+            <FontAwesomeIcon icon={faTimes} size="lg" />
+          </button>
 
-          {/* Menu Links */}
-          <div className="flex flex-col space-y-4 px-6">
-            <a
-              href="/about"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              About
-            </a>
-            <a
-              href="/contact"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              Contact
-            </a>
-            <a
-              href="#"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              Store
-            </a>
-            <a
-              href="#"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              Donation
-            </a>
-
-            <a
-              href="/faq"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              FAQs
-            </a>
-            <a
-              href="/events"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              Events
-            </a>
-            <a
-              href="/partners"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              Partners
-            </a>
-            <a
-              href="#"
-              className="text-lg text-black dark:text-white hover:text-gray-500"
-            >
-              DIY
-            </a>
+          <div className="flex flex-col space-y-4">
+            {MENU_LINKS.map((link) => (
+              <Link
+                key={link.name}
+                to={link.path}
+                className="text-lg text-black dark:text-white hover:text-gray-500"
+                onClick={() => setIsOpen(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
         </div>
       )}
