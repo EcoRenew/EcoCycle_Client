@@ -22,8 +22,13 @@ const ContactPage = () => {
   const contactMethods = [
     { Icon: Mail, title: "Email Us", info: "support@ecocycle.com" },
     { Icon: Phone, title: "Call Us", info: "+1-555-123-4567" },
-    { Icon: Instagram, title: "Follow Us", info: "@EcoCycle" },
-    { Icon: Twitter, title: "Tweet Us", info: "@EcoCycle" },
+    {
+      Icon: Instagram,
+      title: "Follow Us",
+      info: "@EcoCycle",
+      color: "#E1306C",
+    },
+    { Icon: Twitter, title: "Tweet Us", info: "@EcoCycle", color: "#1DA1F2" },
   ];
 
   return (
@@ -73,11 +78,33 @@ const ContactPage = () => {
             return (
               <div
                 key={method.title}
-                className="bg-white dark:bg-[#1B3124] border dark:border-white shadow-md rounded-xl p-6 text-center"
+                className={`bg-white dark:bg-[#1B3124] border dark:border-white shadow-md rounded-xl p-6 text-center transition-transform transform hover:scale-105 ${
+                  method.color
+                    ? "hover:bg-opacity-100"
+                    : "hover:bg-gray-50 dark:hover:bg-[#25432E]"
+                }`}
+                style={{
+                  // only apply brand color on hover for social media
+                  ...(method.color && {
+                    transition: "background-color 0.3s, color 0.3s",
+                  }),
+                }}
               >
-                <Icon className="w-8 h-8 mx-auto mb-3" />
-                <h3 className="font-semibold mb-1">{method.title}</h3>
-                <p className="text-gray-400">{method.info}</p>
+                <Icon
+                  className="w-8 h-8 mx-auto mb-3 transition-colors"
+                  style={{
+                    ...(method.color && { transition: "color 0.3s" }),
+                  }}
+                />
+                <h3
+                  className="font-semibold mb-1"
+                  style={{
+                    ...(method.color && { transition: "color 0.3s" }),
+                  }}
+                >
+                  {method.title}
+                </h3>
+                <p>{method.info}</p>
               </div>
             );
           })}
