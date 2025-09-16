@@ -24,7 +24,6 @@ import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 
-
 const router = createBrowserRouter([
   {
     path: "/",
