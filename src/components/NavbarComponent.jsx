@@ -21,7 +21,8 @@ const MENU_LINKS = [
   { name: "FAQs", path: "/faq" },
   { name: "Events", path: "/events" },
   { name: "Partners", path: "/partners" },
-  { name: "DIY", path: "#" },
+  { name: "DIY", path: "/diy" },
+  { name: "Community", path: "/community" },
 ];
 
 // Cart Button Component
