@@ -8,7 +8,7 @@ import {
   faRecycle,
 } from "@fortawesome/free-solid-svg-icons";
 import ColorModeSwitch from "./ColorModeSwitch";
-
+import { Link } from "react-router-dom";
 const NavbarComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -17,29 +17,32 @@ const NavbarComponent = () => {
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
-            <FontAwesomeIcon
-              icon={faRecycle}
-              className="text-ecoGreen animate-spin-slow"
-              size="2x"
-            />
-            <div className="text-2xl font-bold">EcoCycle</div>
-          </div>
+          <a href="/" className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">
+              <FontAwesomeIcon
+                icon={faRecycle}
+                className="text-ecoGreen animate-spin-slow"
+                size="2x"
+              />
+              <div className="text-2xl font-bold">EcoCycle</div>
+            </div>
+          </a>
 
           {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-6">
-            <a href="#" className="hover:text-gray-500">
+          <div className="hidden lg:flex space-x-6">
+            <a href="/about" className="hover:text-gray-500">
               About
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="/contact" className="hover:text-gray-500">
               Contact
+            </a>
+            <a href="/store" className="hover:text-gray-500">
+              Store
             </a>
             <a href="#" className="hover:text-gray-500">
               Donation
             </a>
-            <a href="#" className="hover:text-gray-500">
-              Recycle
-            </a>
+
             <a href="/faq" className="hover:text-gray-500">
               FAQs
             </a>
@@ -59,15 +62,16 @@ const NavbarComponent = () => {
 
           {/* Right Side */}
           <div className="flex items-center space-x-4">
-            <button className="hover:text-gray-500">
+            <Link to="/register" className="hover:text-gray-500">
               <FontAwesomeIcon icon={faUser} size="lg" />
-            </button>
+            </Link>
+
             <button className="hover:text-gray-500">
               <FontAwesomeIcon icon={faShoppingCart} size="lg" />
             </button>
             <ColorModeSwitch />
             {/* Mobile Menu Button */}
-            <div className="md:hidden">
+            <div className="lg:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="hover:text-gray-500 focus:outline-none"
@@ -81,7 +85,7 @@ const NavbarComponent = () => {
 
       {/* Mobile Menu Fullscreen */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 bg-white dark:bg-bg h-[100dvh] shadow-lg z-40 flex flex-col">
+        <div className="lg:hidden fixed inset-0 bg-white dark:bg-bg h-[100dvh] shadow-lg z-40 flex flex-col">
           {/* Close Button */}
           <div className="flex justify-end p-4">
             <button
@@ -95,13 +99,13 @@ const NavbarComponent = () => {
           {/* Menu Links */}
           <div className="flex flex-col space-y-4 px-6">
             <a
-              href="#"
+              href="/about"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               About
             </a>
             <a
-              href="#"
+              href="/contact"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Contact
@@ -110,14 +114,15 @@ const NavbarComponent = () => {
               href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
-              Donation
+              Store
             </a>
             <a
               href="#"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
-              Recycle
+              Donation
             </a>
+
             <a
               href="/faq"
               className="text-lg text-black dark:text-white hover:text-gray-500"

@@ -50,13 +50,13 @@ const CategoryPurchaseOptions = ({
     <div className="px-6 pb-4 space-y-4">
       {/* وحدة الشراء */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700  dark:text-gray-500 mb-2">
           Purchase Unit:
         </label>
         <select
           value={purchaseUnit}
           onChange={handleUnitChange}
-          className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#38af44]"
+          className="w-full border  text-gray-800 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-[#38af44]"
         >
           <option value="piece">Per Piece</option>
           <option value="bulk">Per Ton (Bulk)</option>
@@ -72,7 +72,9 @@ const CategoryPurchaseOptions = ({
           </div>
           <div className="flex justify-between items-center mt-1">
             <span className="text-sm text-gray-600">Volume Discounts:</span>
-            <span className="text-sm text-orange-600 font-medium">10+ tons: 5% off</span>
+            <span className="text-sm text-orange-600 font-medium">
+              10+ tons: 5% off
+            </span>
           </div>
         </div>
       )}
@@ -80,7 +82,9 @@ const CategoryPurchaseOptions = ({
       {/* الكمية */}
       <div>
         <div className="flex justify-between items-center mb-2">
-          <label className="text-sm font-medium text-gray-700">Quantity:</label>
+          <label className="text-sm font-medium text-gray-700  dark:text-gray-500">
+            Quantity:
+          </label>
           {purchaseUnit === "bulk" && (
             <span className="text-sm text-gray-500">Min. order: 5 ton(s)</span>
           )}
