@@ -30,10 +30,10 @@ const NavbarComponent = () => {
 
           {/* Desktop Menu */}
           <div className="hidden lg:flex space-x-6">
-            <a href="#" className="hover:text-gray-500">
+            <a href="/about" className="hover:text-gray-500">
               About
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="/contact" className="hover:text-gray-500">
               Contact
             </a>
             <a href="/store" className="hover:text-gray-500">
@@ -52,8 +52,11 @@ const NavbarComponent = () => {
             <a href="/partners" className="hover:text-gray-500">
               Partners
             </a>
-            <a href="#" className="hover:text-gray-500">
+            <a href="/diy" className="hover:text-gray-500">
               DIY
+            </a>
+            <a href="/community" className="hover:text-gray-500">
+              Community
             </a>
           </div>
 
@@ -96,13 +99,13 @@ const NavbarComponent = () => {
           {/* Menu Links */}
           <div className="flex flex-col space-y-4 px-6">
             <a
-              href="#"
+              href="/about"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               About
             </a>
             <a
-              href="#"
+              href="/contact"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               Contact
@@ -139,7 +142,7 @@ const NavbarComponent = () => {
               Partners
             </a>
             <a
-              href="#"
+              href="/diy"
               className="text-lg text-black dark:text-white hover:text-gray-500"
             >
               DIY

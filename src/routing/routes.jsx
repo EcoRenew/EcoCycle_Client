@@ -19,6 +19,11 @@ import DonationRequests from "../admin/pages/DonationRequests";
 import Partnerships from "../admin/pages/Partnerships";
 import Settings from "../admin/pages/Settings";
 import AdminRouteGuard from "../admin/components/AdminRouteGuard";
+import DIYPage from "../pages/DIYPage";
+import CommunityPage from "../pages/CommunityPage";
+import AboutPage from "../pages/AboutPage";
+import ContactPage from "../pages/ContactPage";
+
 
 const router = createBrowserRouter([
   {
@@ -28,12 +33,16 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "store", element: <StorePage /> },
+      { path: "about", element: <AboutPage /> },
+      { path: "contact", element: <ContactPage /> },
       { path: "login", element: <Login /> },
       { path: "register", element: <Register /> },
       { path: "faq", element: <FAQPage /> },
       { path: "category/:type", element: <CategoryPage /> },
       { path: "events", element: <EventsPage /> },
       { path: "partners", element: <PartnersPage /> },
+      { path: "diy", element: <DIYPage /> },
+      { path: "community", element: <CommunityPage /> },
     ],
   },
   {
