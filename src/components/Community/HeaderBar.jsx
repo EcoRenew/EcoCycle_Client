@@ -1,14 +1,18 @@
-import { Camera } from 'lucide-react';
+import { Camera } from "lucide-react";
 
 const HeaderBar = ({ setShowShareModal }) => (
-  <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+  <div className=" border-b border-gray-200 sticky top-0 z-10">
     <div className="max-w-4xl mx-auto px-4 py-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">DIY Community</h1>
-          <p className="text-gray-600">Share your creations and get inspired</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            DIY Community
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Share your creations and get inspired
+          </p>
         </div>
-        <button 
+        <button
           onClick={() => setShowShareModal(true)}
           className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
         >

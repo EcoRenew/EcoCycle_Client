@@ -45,7 +45,7 @@ const AboutPage = () => {
           </h1>
 
           {/* Intro */}
-          <p className="text-lg md:text-xl text-center leading-relaxed text-gray-500 max-w-3xl mx-auto mb-20">
+          <p className="text-lg md:text-xl text-center leading-relaxed dark:text-gray-400 text-gray-500 max-w-3xl mx-auto mb-20">
             EcoCycle is dedicated to creating a sustainable future through
             innovative recycling solutions. Our mission is to empower
             individuals and businesses to reduce waste and protect our planet.
@@ -60,7 +60,7 @@ const AboutPage = () => {
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   Our Mission
                 </h2>
-                <p className="text-lg leading-relaxed text-gray-500">
+                <p className="text-lg leading-relaxed dark:text-gray-400 text-gray-500">
                   To lead the way in recycling innovation, providing accessible
                   and effective solutions that minimize environmental impact and
                   promote a circular economy.
@@ -72,7 +72,7 @@ const AboutPage = () => {
                 <h2 className="text-2xl md:text-3xl font-bold mb-4">
                   Our Vision
                 </h2>
-                <p className="text-lg leading-relaxed text-gray-500">
+                <p className="text-lg leading-relaxed dark:text-gray-400 text-gray-500">
                   To be the trusted partner for individuals and businesses
                   seeking to make a positive change through responsible
                   recycling practices.
@@ -81,7 +81,7 @@ const AboutPage = () => {
             </div>
 
             {/* Right Side: Values */}
-            <div className=" dark:bg-transparent rounded-2xl shadow-lg border border-gray-100 dark:border-none p-6 md:p-8">
+            <div className="rounded-2xl shadow-lg border border-gray-100 dark:border-none p-6 md:p-8">
               <h2 className="text-2xl md:text-3xl font-bold mb-8">
                 Our Values
               </h2>
@@ -97,7 +97,9 @@ const AboutPage = () => {
                     />
                     <div>
                       <span className="font-semibold">{value.title}: </span>
-                      <span className="text-gray-500">{value.desc}</span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {value.desc}
+                      </span>
                     </div>
                   </li>
                 ))}
@@ -109,7 +111,7 @@ const AboutPage = () => {
             <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12">
               Inspiring Stories of Change
             </h2>
-            <p className="text-center text-lg md:text-xl text-gray-500 max-w-3xl mx-auto mb-12">
+            <p className="text-center text-lg md:text-xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-12">
               Discover how our users and partners are making a tangible impact
               on the environment. Their stories fuel our mission and showcase
               the power of collective action in recycling.
@@ -118,17 +120,19 @@ const AboutPage = () => {
               {stories.map((story, idx) => (
                 <div
                   key={idx}
-                  className="group rounded-md shadow-md border border-gray-100 dark:border-none p-6 hover:shadow-lg transition flex flex-col items-center text-center"
+                  className="group bg-white dark:bg-[#1B3124] rounded-3xl shadow-md border border-gray-100 dark:border-none p-6 hover:shadow-lg transition flex flex-col items-center text-center"
                 >
                   <img
                     src={story.image}
                     alt={story.title}
-                    className="w-[20rem] h-[24rem] object-cover rounded-xl mb-4"
+                    className="w-full h-[35rem] object-cover rounded-xl mb-4"
                   />
                   <h3 className="text-2xl font-bold mb-4 transition-colors group-hover:text-ecoGreen">
                     {story.title}
                   </h3>
-                  <p className="text-gray-500">{story.desc}</p>
+                  <p className="text-gray-500 dark:text-gray-400">
+                    {story.desc}
+                  </p>
                 </div>
               ))}
             </div>

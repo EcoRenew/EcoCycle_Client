@@ -1,12 +1,28 @@
 import { useCart } from "../hooks/useCart";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
+import { createStripeCheckoutSession } from "../services/stripeService";
 
 const CartSidebar = ({ isOpen, onClose }) => {
   const { cartItems, addToCart, removeFromCart } = useCart();
 
-  if (!isOpen) return null; // hide sidebar when not open
+  if (!isOpen) return null;
 
+  const handleCheckout = async () => {
+    try {
+      const products = cartItems.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+      }));
+
+      const session = await createStripeCheckoutSession(products);
+
+      // Redirect to Stripe checkout
+      window.location.href = session.url;
+    } catch {
+      alert("Failed to start checkout. Try again.");
+    }
+  };
   return (
     <aside className="fixed right-0 top-0 w-80 h-full bg-white dark:bg-[#25432E] shadow-lg flex flex-col z-50">
       {/* Header */}
@@ -28,19 +44,14 @@ const CartSidebar = ({ isOpen, onClose }) => {
                 key={item.id}
                 className="flex items-center justify-between border-b pb-3"
               >
-                {/* Product Image */}
                 <img
                   src={item.img}
                   alt={item.name}
                   className="w-16 h-16 object-cover rounded-lg border"
                 />
-
-                {/* Product Info */}
                 <div className="flex-1 ml-3">
                   <p className="font-semibold">{item.name}</p>
                   <p className="text-sm">{item.price} LE</p>
-
-                  {/* Quantity controls */}
                   <div className="flex items-center mt-2">
                     <button
                       onClick={() => removeFromCart(item.id)}
@@ -68,7 +79,10 @@ const CartSidebar = ({ isOpen, onClose }) => {
       {/* Checkout Button */}
       {cartItems.length > 0 && (
         <div className="p-4 border-t sticky bottom-0 bg-white dark:bg-[#25432E]">
-          <button className="w-full py-3 bg-ecoGreen text-white font-semibold rounded-lg hover:bg-green-700 transition">
+          <button
+            onClick={handleCheckout}
+            className="w-full py-3 bg-ecoGreen text-white font-semibold rounded-lg hover:bg-green-700 transition"
+          >
             Proceed to Checkout
           </button>
         </div>
