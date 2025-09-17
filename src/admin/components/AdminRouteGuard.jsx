@@ -3,7 +3,7 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 
 const AdminRouteGuard = ({ children }) => {
-  const { isAuthenticated, loading } = useAdminAuth();
+  const { adminToken, adminUser, loading } = useAdminAuth();
   const location = useLocation();
 
   // Show loading spinner while checking authentication
@@ -19,7 +19,7 @@ const AdminRouteGuard = ({ children }) => {
   }
 
   // If not authenticated, redirect to admin login
-  if (!isAuthenticated()) {
+  if (!adminToken || !adminUser) {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
