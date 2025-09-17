@@ -18,6 +18,7 @@ import ContentManagement from "../admin/pages/ContentManagement";
 import DonationRequests from "../admin/pages/DonationRequests";
 import Partnerships from "../admin/pages/Partnerships";
 import Settings from "../admin/pages/Settings";
+import CategoryManagement from "../admin/pages/CategoryManagement";
 import AdminRouteGuard from "../admin/components/AdminRouteGuard";
 import DIYPage from "../pages/DIYPage";
 import CommunityPage from "../pages/CommunityPage";
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <AdminDashboard /> },
           { path: "users", element: <UserManagement /> },
+          { path: "categories", element: <CategoryManagement /> },
           { path: "content", element: <ContentManagement /> },
           { path: "donations", element: <DonationRequests /> },
           { path: "partnerships", element: <Partnerships /> },

@@ -1,116 +1,98 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
-  FaSearch,
-  FaSpinner,
+  FaSearch, 
+  FaFilter as FunnelIcon, 
+  FaSpinner, 
   FaExclamationTriangle,
-  FaFilter as FunnelIcon,
+  FaEye,
+  FaEdit,
+  FaTrash,
   FaAngleLeft,
   FaAngleRight,
   FaAngleDoubleLeft,
   FaAngleDoubleRight
 } from 'react-icons/fa';
-import UserModal from '../components/UserModal';
+import { requestApi } from '../../services/adminApi';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { userApi } from '../../services/adminApi';
 
-const UserManagement = () => {
+const RequestManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [users, setUsers] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [requestToDelete, setRequestToDelete] = useState(null);
 
   useEffect(() => {
-    fetchUsers();
-  }, [currentPage, selectedRole, searchTerm]);
+    fetchRequests();
+  }, [currentPage, selectedStatus, searchTerm]);
 
-  const fetchUsers = async () => {
+  const fetchRequests = async () => {
     try {
       setLoading(true);
       setError(null);
       const params = {
         page: currentPage,
         per_page: 10,
-        role: selectedRole !== 'all' ? selectedRole : undefined,
+        status: selectedStatus !== 'all' ? selectedStatus : undefined,
         search: searchTerm || undefined
       };
-      const response = await userApi.getUsers(params);
-      setUsers(response.data.data.data);
+      const response = await requestApi.getRequests(params);
+      setRequests(response.data.data.data);
       setTotalPages(response.data.data.last_page);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch users');
-      console.error('Users fetch error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch requests');
+      console.error('Requests fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditUser = (user) => {
-    setSelectedUser(user);
-    setIsUserModalOpen(true);
-  };
-
-  const handleDeleteUser = (user) => {
-    setUserToDelete(user);
+  const handleDeleteRequest = (request) => {
+    setRequestToDelete(request);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     try {
-      await userApi.deleteUser(userToDelete.user_id);
+      await requestApi.deleteRequest(requestToDelete.id);
       setIsDeleteDialogOpen(false);
-      setUserToDelete(null);
-      fetchUsers(); // Refresh the list
+      setRequestToDelete(null);
+      fetchRequests(); // Refresh the list
     } catch (err) {
-      console.error('Delete user error:', err);
-      alert(err.response?.data?.message || 'Failed to delete user');
+      console.error('Delete request error:', err);
+      alert(err.response?.data?.message || 'Failed to delete request');
     }
   };
 
-  const handleUserSave = async (userData) => {
+  const handleStatusChange = async (requestId, newStatus) => {
     try {
-      if (selectedUser) {
-        await userApi.updateUser(selectedUser.user_id, userData);
-      } else {
-        await userApi.createUser(userData);
-      }
-      setIsUserModalOpen(false);
-      setSelectedUser(null);
-      fetchUsers(); // Refresh the list
+      await requestApi.updateRequestStatus(requestId, newStatus);
+      fetchRequests(); // Refresh the list
     } catch (err) {
-      console.error('Save user error:', err);
-      throw err; // Let the modal handle the error display
-    }
-  };
-
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'collector':
-        return 'bg-blue-100 text-blue-800';
-      case 'factory':
-        return 'bg-purple-100 text-purple-800';
-      case 'user':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
+      console.error('Update status error:', err);
+      alert(err.response?.data?.message || 'Failed to update request status');
     }
   };
 
   const getStatusBadgeColor = (status) => {
-    return status === 'active'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+        return 'bg-green-100 text-green-800';
+      case 'in_progress':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-purple-100 text-purple-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
@@ -118,19 +100,9 @@ const UserManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Accounts</h1>
-          <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
+          <h1 className="text-2xl font-bold text-gray-900">Recycling Requests</h1>
+          <p className="text-gray-600 mt-1">Manage customer recycling requests</p>
         </div>
-        <button
-          onClick={() => {
-            setSelectedUser(null);
-            setIsUserModalOpen(true);
-          }}
-          className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-ecoGreen hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ecoGreen"
-        >
-          <FaPlus className="h-4 w-4 mr-2" />
-          Add User
-        </button>
       </div>
 
       {/* Filters */}
@@ -142,7 +114,7 @@ const UserManagement = () => {
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Search requests..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen"
@@ -150,46 +122,47 @@ const UserManagement = () => {
             </div>
           </div>
           
-          {/* Role Filter */}
+          {/* Status Filter */}
           <div className="sm:w-48">
             <div className="relative">
               <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen appearance-none"
               >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="collector">Collector</option>
-                <option value="factory">Factory</option>
-                <option value="user">Customer</option>
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
               </select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Users Table */}
+      {/* Requests Table */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
+                  Request ID
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
+                  Customer
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
+                  Pickup Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Joined
+                  Created
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -197,56 +170,57 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.user_id} className="hover:bg-gray-50">
+              {requests.map((request) => (
+                <tr key={request.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="h-10 w-10 flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-ecoGreen flex items-center justify-center">
-                          <span className="text-sm font-medium text-white">
-                            {/* {user.full_name.charAt(0)} */}
-                            
-                          </span>
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">
-                          {user.full_name}
-                        </div>
-                        <div className="text-sm text-gray-500">ID: {user.user_id}</div>
-                      </div>
+                    <div className="text-sm font-medium text-gray-900">
+                      #{request.id}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
-                    <div className="text-sm text-gray-500">{user.phone}</div>
+                    <div className="text-sm text-gray-900">{request.customer?.name}</div>
+                    <div className="text-sm text-gray-500">{request.customer?.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
-                      {user.role}
-                    </span>
+                    <div className="text-sm text-gray-900">
+                      {new Date(request.pickup_date).toLocaleDateString()}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {request.pickup_time_slot}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(user.status)}`}>
-                      {user.status}
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(request.status)}`}>
+                      {request.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.created_at).toLocaleDateString()}
+                    {new Date(request.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <button
-                        onClick={() => handleEditUser(user)}
-                        className="text-ecoGreen hover:text-green-600 p-1"
-                        title="Edit user"
+                        onClick={() => window.location.href = `/admin/requests/${request.id}`}
+                        className="text-blue-600 hover:text-blue-800 p-1"
+                        title="View details"
                       >
-                        <FaEdit className="h-4 w-4" />
+                        <FaEye className="h-4 w-4" />
                       </button>
+                      <select
+                        value={request.status}
+                        onChange={(e) => handleStatusChange(request.id, e.target.value)}
+                        className="text-sm border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen"
+                      >
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
                       <button
-                        onClick={() => handleDeleteUser(user)}
+                        onClick={() => handleDeleteRequest(request)}
                         className="text-red-600 hover:text-red-800 p-1"
-                        title="Delete user"
+                        title="Delete request"
                       >
                         <FaTrash className="h-4 w-4" />
                       </button>
@@ -259,7 +233,7 @@ const UserManagement = () => {
         </div>
         
         {/* Pagination */}
-        {!loading && users.length > 0 && (
+        {!loading && requests.length > 0 && (
           <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
@@ -342,10 +316,10 @@ const UserManagement = () => {
         )}
         
         {/* Empty State */}
-        {!loading && users.length === 0 && (
+        {!loading && requests.length === 0 && (
           <div className="px-6 py-10 text-center">
             <FaExclamationTriangle className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No requests found</h3>
             <p className="mt-1 text-sm text-gray-500">
               Try adjusting your search or filter to find what you're looking for.
             </p>
@@ -356,31 +330,21 @@ const UserManagement = () => {
         {loading && (
           <div className="px-6 py-10 text-center">
             <FaSpinner className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Loading users...</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Loading requests...</h3>
           </div>
         )}
       </div>
-
-      {/* User Modal */}
-      <UserModal
-        isOpen={isUserModalOpen}
-        onClose={() => {
-          setIsUserModalOpen(false);
-          setSelectedUser(null);
-        }}
-        user={selectedUser}
-      />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => {
           setIsDeleteDialogOpen(false);
-          setUserToDelete(null);
+          setRequestToDelete(null);
         }}
         onConfirm={confirmDelete}
-        title="Delete User"
-        message={`Are you sure you want to delete ${userToDelete?.full_name}? This action cannot be undone.`}
+        title="Delete Request"
+        message={`Are you sure you want to delete request #${requestToDelete?.id}? This action cannot be undone.`}
         confirmText="Delete"
         confirmButtonClass="bg-red-600 hover:bg-red-700 focus:ring-red-500"
       />
@@ -388,4 +352,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default RequestManagement;
