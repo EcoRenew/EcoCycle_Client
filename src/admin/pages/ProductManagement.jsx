@@ -12,105 +12,84 @@ import {
   FaAngleDoubleLeft,
   FaAngleDoubleRight
 } from 'react-icons/fa';
-import UserModal from '../components/UserModal';
+import { productApi } from '../../services/adminApi';
 import ConfirmDialog from '../components/ConfirmDialog';
-import { userApi } from '../../services/adminApi';
+import ProductModal from '../components/ProductModal';
 
-const UserManagement = () => {
+const ProductManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState(null);
-  const [users, setUsers] = useState([]);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchUsers();
-  }, [currentPage, selectedRole, searchTerm]);
+    fetchProducts();
+  }, [currentPage, selectedCategory, searchTerm]);
 
-  const fetchUsers = async () => {
+  const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
       const params = {
         page: currentPage,
         per_page: 10,
-        role: selectedRole !== 'all' ? selectedRole : undefined,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
         search: searchTerm || undefined
       };
-      const response = await userApi.getUsers(params);
-      setUsers(response.data.data.data);
+      const response = await productApi.getProducts(params);
+      setProducts(response.data.data.data);
       setTotalPages(response.data.data.last_page);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch users');
-      console.error('Users fetch error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch products');
+      console.error('Products fetch error:', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditUser = (user) => {
-    setSelectedUser(user);
-    setIsUserModalOpen(true);
+  const handleEditProduct = (product) => {
+    setSelectedProduct(product);
+    setIsProductModalOpen(true);
   };
 
-  const handleDeleteUser = (user) => {
-    setUserToDelete(user);
+  const handleDeleteProduct = (product) => {
+    setProductToDelete(product);
     setIsDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     try {
-      await userApi.deleteUser(userToDelete.user_id);
+      await productApi.deleteProduct(productToDelete.id);
       setIsDeleteDialogOpen(false);
-      setUserToDelete(null);
-      fetchUsers(); // Refresh the list
+      setProductToDelete(null);
+      fetchProducts(); // Refresh the list
     } catch (err) {
-      console.error('Delete user error:', err);
-      alert(err.response?.data?.message || 'Failed to delete user');
+      console.error('Delete product error:', err);
+      alert(err.response?.data?.message || 'Failed to delete product');
     }
   };
 
-  const handleUserSave = async (userData) => {
+  const handleProductSave = async (productData) => {
     try {
-      if (selectedUser) {
-        await userApi.updateUser(selectedUser.user_id, userData);
+      if (selectedProduct) {
+        await productApi.updateProduct(selectedProduct.id, productData);
       } else {
-        await userApi.createUser(userData);
+        await productApi.createProduct(productData);
       }
-      setIsUserModalOpen(false);
-      setSelectedUser(null);
-      fetchUsers(); // Refresh the list
+      setIsProductModalOpen(false);
+      setSelectedProduct(null);
+      fetchProducts(); // Refresh the list
     } catch (err) {
-      console.error('Save user error:', err);
+      console.error('Save product error:', err);
       throw err; // Let the modal handle the error display
     }
-  };
-
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'collector':
-        return 'bg-blue-100 text-blue-800';
-      case 'factory':
-        return 'bg-purple-100 text-purple-800';
-      case 'user':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusBadgeColor = (status) => {
-    return status === 'active'
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
   };
 
   return (
@@ -118,18 +97,18 @@ const UserManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Accounts</h1>
-          <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
+          <h1 className="text-2xl font-bold text-gray-900">Products</h1>
+          <p className="text-gray-600 mt-1">Manage recycled products</p>
         </div>
         <button
           onClick={() => {
-            setSelectedUser(null);
-            setIsUserModalOpen(true);
+            setSelectedProduct(null);
+            setIsProductModalOpen(true);
           }}
           className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-ecoGreen hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ecoGreen"
         >
           <FaPlus className="h-4 w-4 mr-2" />
-          Add User
+          Add Product
         </button>
       </div>
 
@@ -142,7 +121,7 @@ const UserManagement = () => {
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Search products..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen"
@@ -150,46 +129,46 @@ const UserManagement = () => {
             </div>
           </div>
           
-          {/* Role Filter */}
+          {/* Category Filter */}
           <div className="sm:w-48">
             <div className="relative">
               <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen appearance-none"
               >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="collector">Collector</option>
-                <option value="factory">Factory</option>
-                <option value="user">Customer</option>
+                <option value="all">All Categories</option>
+                <option value="furniture">Furniture</option>
+                <option value="decor">Home Decor</option>
+                <option value="accessories">Accessories</option>
+                <option value="other">Other</option>
               </select>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Users Table */}
+      {/* Products Table */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
+                  Product
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Contact
+                  Category
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
+                  Price
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Stock
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Joined
+                  Created
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -197,56 +176,62 @@ const UserManagement = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user) => (
-                <tr key={user.user_id} className="hover:bg-gray-50">
+              {products.map((product) => (
+                <tr key={product.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-ecoGreen flex items-center justify-center">
-                          <span className="text-sm font-medium text-white">
-                            {/* {user.full_name.charAt(0)} */}
-                            
-                          </span>
-                        </div>
+                        {product.image_url ? (
+                          <img
+                            className="h-10 w-10 rounded-full object-cover"
+                            src={product.image_url}
+                            alt={product.name}
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+                            <span className="text-sm font-medium text-gray-500">
+                              {product.name.charAt(0)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.full_name}
+                          {product.name}
                         </div>
-                        <div className="text-sm text-gray-500">ID: {user.user_id}</div>
+                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                          {product.description}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.email}</div>
-                    <div className="text-sm text-gray-500">{user.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
-                      {user.role}
+                    <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                      {product.category}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(user.status)}`}>
-                      {user.status}
-                    </span>
+                    <div className="text-sm text-gray-900">${product.price.toFixed(2)}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{product.stock}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.created_at).toLocaleDateString()}
+                    {new Date(product.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <button
-                        onClick={() => handleEditUser(user)}
+                        onClick={() => handleEditProduct(product)}
                         className="text-ecoGreen hover:text-green-600 p-1"
-                        title="Edit user"
+                        title="Edit product"
                       >
                         <FaEdit className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDeleteUser(user)}
+                        onClick={() => handleDeleteProduct(product)}
                         className="text-red-600 hover:text-red-800 p-1"
-                        title="Delete user"
+                        title="Delete product"
                       >
                         <FaTrash className="h-4 w-4" />
                       </button>
@@ -259,7 +244,7 @@ const UserManagement = () => {
         </div>
         
         {/* Pagination */}
-        {!loading && users.length > 0 && (
+        {!loading && products.length > 0 && (
           <div className="px-6 py-3 flex items-center justify-between border-t border-gray-200">
             <div className="flex-1 flex justify-between sm:hidden">
               <button
@@ -342,10 +327,10 @@ const UserManagement = () => {
         )}
         
         {/* Empty State */}
-        {!loading && users.length === 0 && (
+        {!loading && products.length === 0 && (
           <div className="px-6 py-10 text-center">
             <FaExclamationTriangle className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No products found</h3>
             <p className="mt-1 text-sm text-gray-500">
               Try adjusting your search or filter to find what you're looking for.
             </p>
@@ -356,31 +341,34 @@ const UserManagement = () => {
         {loading && (
           <div className="px-6 py-10 text-center">
             <FaSpinner className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Loading users...</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Loading products...</h3>
           </div>
         )}
       </div>
 
-      {/* User Modal */}
-      <UserModal
-        isOpen={isUserModalOpen}
-        onClose={() => {
-          setIsUserModalOpen(false);
-          setSelectedUser(null);
-        }}
-        user={selectedUser}
-      />
+      {/* Product Modal */}
+      {isProductModalOpen && (
+        <ProductModal
+          isOpen={isProductModalOpen}
+          onClose={() => {
+            setIsProductModalOpen(false);
+            setSelectedProduct(null);
+          }}
+          product={selectedProduct}
+          onSave={handleProductSave}
+        />
+      )}
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={isDeleteDialogOpen}
         onClose={() => {
           setIsDeleteDialogOpen(false);
-          setUserToDelete(null);
+          setProductToDelete(null);
         }}
         onConfirm={confirmDelete}
-        title="Delete User"
-        message={`Are you sure you want to delete ${userToDelete?.full_name}? This action cannot be undone.`}
+        title="Delete Product"
+        message={`Are you sure you want to delete ${productToDelete?.name}? This action cannot be undone.`}
         confirmText="Delete"
         confirmButtonClass="bg-red-600 hover:bg-red-700 focus:ring-red-500"
       />
@@ -388,4 +376,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default ProductManagement;
