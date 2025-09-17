@@ -1,5 +1,5 @@
 import ProductList from "../components/ProductsList";
-import Header from "../assets/StoreHeader.png";
+import Header from "../assets/storeHeader.png";
 import { useProducts } from "../hooks/useProducts";
 import { faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

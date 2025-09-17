@@ -26,10 +26,10 @@ const CartSidebar = ({ isOpen, onClose }) => {
   // get token
 
   const handleCheckout = async () => {
-    if (!user) {
-      alert("Please login first!");
-      return;
-    }
+    // if (!user) {
+    //   alert("Please login first!");
+    //   return;
+    // }
 
     const products = cartItems
       .filter((item) => (item.product || item)?.id)
