@@ -1,4 +1,3 @@
-import React from "react";
 import ProductList from "../components/ProductsList";
 import Header from "../assets/StoreHeader.png";
 import { useProducts } from "../hooks/useProducts";
