@@ -7,7 +7,7 @@ const CategoryManagement = () => {
   const [pagination, setPagination] = useState({ current_page: 1, last_page: 1 });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [form, setForm] = useState({ category_name: '', parent_category_id: '' });
+  const [form, setForm] = useState({ category_name: '', parent_category_id:  '' });
   const [editing, setEditing] = useState(null);
 
   const parentOptions = useMemo(() => {
