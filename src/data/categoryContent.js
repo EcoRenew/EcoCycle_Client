@@ -41,7 +41,7 @@ export const categoryContent = {
  },
 
   metals: {
-    title: "Electronics",
+    title: "metals",
     headerImage: "header_metal.png",
     videoSection: {
       heading: "How We Recycle Electronics",

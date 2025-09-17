@@ -14,16 +14,53 @@ const DIYPage = () => {
 
   const userInspirations = [/* بيانات المجتمع */];
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim() && !uploadedImage) return;
-    setIsLoading(true);
+//   const handleSearch = async () => {
+//     if (!searchQuery.trim() && !uploadedImage) return;
+//     setIsLoading(true);
 
-    // هنا هتربطي بالباك إند لاحقًا
-    setTimeout(() => {
-      setSuggestions([/* بيانات الاقتراحات */]);
-      setIsLoading(false);
-    }, 2000);
-  };
+//     // هنا هتربطي بالباك إند لاحقًا
+//     setTimeout(() => {
+//       setSuggestions([/* بيانات الاقتراحات */]);
+//       setIsLoading(false);
+//     }, 2000);
+//   };
+
+const handleSearch = async () => {
+  if (!searchQuery.trim() && !uploadedImage) return;
+  setIsLoading(true);
+
+  try {
+    // لو فيه صورة مرفوعة، نبعث وصف بسيط عنها (مؤقتًا)
+    const imageDescription = uploadedImage ? "The image shows a recycled item" : null;
+
+    const response = await fetch('http://localhost:8000/api/ai/diy-helper', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: searchQuery,
+        image_description: imageDescription
+      })
+    });
+
+    const data = await response.json();
+
+    // نجهز الـ suggestion بالشكل اللي الفرونت بيعرضه
+    const suggestion = {
+      id: Date.now(), // مؤقتًا
+      title: data.title,
+      description: data.description,
+      videoUrl: data.videoUrl,
+      image: data.image
+    };
+
+    setSuggestions([suggestion]);
+  } catch (error) {
+    console.error('Error fetching AI suggestion:', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
