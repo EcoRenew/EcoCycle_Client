@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, ChevronDown, ChevronUp, Minus, Plus, Calendar, Clock, Trash2, Send } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+
+// API base (normalize to include one trailing /api)
+const envBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const apiBase = envBase.endsWith('/api') ? envBase : `${envBase.replace(/\/$/, '')}/api`;
 
 const RecyclingRequestPage = () => {
+  const { user, token, loading: authLoading } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   // image upload not used yet (removed setter)
   const [expandedMaterial, setExpandedMaterial] = useState(null);
@@ -18,12 +24,22 @@ const RecyclingRequestPage = () => {
     notes: ""
   });
   const [addresses, setAddresses] = useState([]);
+  const [phoneNumbers, setPhoneNumbers] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [selectedPhoneId, setSelectedPhoneId] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
+  const [showAddPhoneForm, setShowAddPhoneForm] = useState(false);
   const [newAddressStreet, setNewAddressStreet] = useState('');
   const [newAddressCity, setNewAddressCity] = useState('');
+  const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [isCreatingAddress, setIsCreatingAddress] = useState(false);
+  const [isCreatingPhone, setIsCreatingPhone] = useState(false);
+  
+  // Submission state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [submissionError, setSubmissionError] = useState(null);
 
   // materials fetched from backend
   const [materials, setMaterials] = useState([]);
@@ -31,12 +47,19 @@ const RecyclingRequestPage = () => {
   const [materialsError, setMaterialsError] = useState(null);
 
   useEffect(() => {
+    // Set user name from authenticated user data
+    if (user && user.name) {
+      setFormData(prev => ({ ...prev, fullName: user.name }));
+    }
+  }, [user]);
+
+  useEffect(() => {
     // Fetch materials from the backend API on mount
     const fetchMaterials = async () => {
       setIsLoadingMaterials(true);
       setMaterialsError(null);
       try {
-        const res = await fetch('http://localhost:8000/api/materials');
+        const res = await fetch(`${apiBase}/materials`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = await res.json();
 
@@ -99,22 +122,73 @@ const RecyclingRequestPage = () => {
 
     fetchMaterials();
 
-    // Fetch user addresses (if authenticated). We include credentials for Sanctum
+    // Only fetch user data if authenticated
+    if (!token || authLoading) return;
+
+    // Fetch user addresses (if authenticated)
     const fetchAddresses = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/addresses', { credentials: 'include' });
+        const res = await fetch(`${apiBase}/addresses`, { 
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
         if (!res.ok) return; // probably not authenticated, silently ignore
         const json = await res.json();
-        const data = json.data || json;
-        setAddresses(data);
-        if (data.length > 0) setSelectedAddressId(data[0].address_id || data[0].id);
+        const data = (json.data || json) || [];
+
+        // Normalize addresses to { id: string, street, city, raw }
+        const normalized = data.map(a => ({
+          id: String(a.address_id || a.id),
+          street: a.street || a.address || '',
+          city: a.city || '',
+          raw: a
+        }));
+
+        setAddresses(normalized);
+        if (normalized.length > 0) {
+          setSelectedAddressId(normalized[0].id);
+        }
       } catch (err) {
         console.warn('Could not fetch addresses', err);
       }
     };
 
     fetchAddresses();
-  }, []);
+    
+    // Fetch user phone numbers (if authenticated)
+    const fetchPhoneNumbers = async () => {
+      try {
+        const res = await fetch(`${apiBase}/phone-numbers`, { 
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        if (!res.ok) return; // probably not authenticated, silently ignore
+        const json = await res.json();
+        const data = (json.data || json) || [];
+
+        // Normalize phone numbers to { id: string, number, raw }
+        const normalized = data.map(p => ({
+          id: String(p.id || p.phone_id || p.user_id),
+          number: p.number || p.phone_number || p.phone || '',
+          raw: p
+        }));
+
+        setPhoneNumbers(normalized);
+        if (normalized.length > 0) {
+          setSelectedPhoneId(normalized[0].id);
+          setFormData(prev => ({ ...prev, phoneNumber: normalized[0].number }));
+        }
+      } catch (err) {
+        console.warn('Could not fetch phone numbers', err);
+      }
+    };
+    
+    fetchPhoneNumbers();
+  }, [token, authLoading]);
 
 
   const handleInputChange = (e) => {
@@ -131,12 +205,19 @@ const RecyclingRequestPage = () => {
       return null;
     }
 
+    if (!token) {
+      setValidationErrors({ pickup_address_id: 'You must be logged in to create addresses.' });
+      return null;
+    }
+
     setIsCreatingAddress(true);
     try {
-      const res = await fetch('http://localhost:8000/api/addresses', {
+      const res = await fetch(`${apiBase}/addresses`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify({ street: newAddressStreet.trim(), city: newAddressCity.trim() })
       });
 
@@ -148,22 +229,70 @@ const RecyclingRequestPage = () => {
 
       const json = await res.json();
       const addr = json.data;
-      // Ensure addresses updated and selected
-      const id = addr.address_id || addr.id;
-      const updated = [...addresses, addr];
+      // Normalize address
+      const normAddr = { id: String(addr.address_id || addr.id), street: addr.street || '', city: addr.city || '', raw: addr };
+      const updated = [...addresses, normAddr];
       setAddresses(updated);
-      setSelectedAddressId(id);
+      setSelectedAddressId(normAddr.id);
       setShowAddAddressForm(false);
       setNewAddressStreet('');
       setNewAddressCity('');
       setValidationErrors({});
-      return id;
+      return normAddr.id;
     } catch (err) {
       console.error('Create address error', err);
       setValidationErrors({ pickup_address_id: 'Failed to create address' });
       return null;
     } finally {
       setIsCreatingAddress(false);
+    }
+  };
+
+  const createPhone = async () => {
+    if (!newPhoneNumber.trim()) {
+      setValidationErrors({ contact_phone: 'Phone number is required.' });
+      return null;
+    }
+
+    if (!token) {
+      setValidationErrors({ contact_phone: 'You must be logged in to create phone numbers.' });
+      return null;
+    }
+
+    setIsCreatingPhone(true);
+    try {
+      const res = await fetch(`${apiBase}/phone-numbers`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ number: newPhoneNumber.trim() })
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setValidationErrors({ contact_phone: err.message || 'Failed to create phone number' });
+        return null;
+      }
+
+      const json = await res.json();
+      const phone = json.data;
+      const normPhone = { id: String(phone.id || phone.phone_id || phone.user_id), number: phone.number || phone.phone_number || phone.phone || '', raw: phone };
+      const updated = [...phoneNumbers, normPhone];
+      setPhoneNumbers(updated);
+      setSelectedPhoneId(normPhone.id);
+      setFormData(prev => ({ ...prev, phoneNumber: normPhone.number }));
+      setShowAddPhoneForm(false);
+      setNewPhoneNumber('');
+      setValidationErrors({});
+      return normPhone.id;
+    } catch (err) {
+      console.error('Create phone error', err);
+      setValidationErrors({ contact_phone: 'Failed to create phone number' });
+      return null;
+    } finally {
+      setIsCreatingPhone(false);
     }
   };
 
@@ -235,14 +364,18 @@ const RecyclingRequestPage = () => {
     // Frontend validation that mirrors backend StoreRequestRequest
     const errors = {};
 
-    // request_type: default to 'Recycling' unless user chooses Donation
+    // request_type: required, must be either 'Donation' or 'Recycling'
     const requestType = formData.request_type || 'Recycling';
+    if (!['Donation', 'Recycling'].includes(requestType)) {
+      errors.request_type = 'Request type must be either Donation or Recycling.';
+    }
 
+    // pickup_address_id: required, must be an integer that exists in addresses
     if (!selectedAddressId) {
       errors.pickup_address_id = 'Please select or create a pickup address.';
     }
 
-    // pickup date: required, date, >= today, at least 48 hours in advance, not Friday
+    // pickup date: required, date, >= today, <= 3 months from now, not Friday
     if (!formData.pickupDate) {
       errors.pickup_date = 'Please select a pickup date.';
     } else {
@@ -251,54 +384,89 @@ const RecyclingRequestPage = () => {
       const diffHours = (selected - now) / (1000 * 60 * 60);
       const maxDate = new Date();
       maxDate.setMonth(maxDate.getMonth() + 3);
+      
       // Friday check (Friday is day 5 in JS where Sunday=0)
       if (selected.getDay() === 5) {
         errors.pickup_date = 'Pickup cannot be scheduled on Fridays.';
       }
+      
+      // Past date check
       if (selected < new Date(now.toDateString())) {
         errors.pickup_date = 'Pickup date cannot be in the past.';
       }
+      
+      // 48 hours in advance check
       if (diffHours < 48) {
         errors.pickup_date = 'Pickup must be scheduled at least 48 hours in advance.';
       }
+      
+      // Max 3 months check
       if (selected > maxDate) {
         errors.pickup_date = 'Pickup date cannot be more than 3 months in advance.';
       }
     }
 
-    // materials
+    // materials: required, array, min 1 item
     if (!Array.isArray(selectedItems) || selectedItems.length === 0) {
       errors.materials = 'You must include at least one material in your request.';
     } else {
       const materialIds = [];
       selectedItems.forEach((it, idx) => {
+        // material_id: required, integer, must exist in materials table
         if (!it.itemId) {
           errors[`materials.${idx}.material_id`] = 'Each material must have a valid material ID.';
         }
+        
+        // quantity: required, numeric
         if (typeof it.quantity !== 'number' || Number.isNaN(it.quantity)) {
           errors[`materials.${idx}.quantity`] = 'Quantity must be a valid number.';
         } else {
-          // enforce user-level minimums similar to backend (assume type 'user')
+          // Get user type (default to 'user' if not available)
+          const userType = localStorage.getItem('user_type') || 'user';
+          
+          // Get material and unit
           const mat = materials.find(m => m.id === it.materialId);
           const unit = it.unit || (mat && mat.items && mat.items[0] && mat.items[0].unit) || 'pieces';
-          if (unit === 'pieces' || unit === 'item') {
-            if (it.quantity < 1) errors[`materials.${idx}.quantity`] = 'Minimum quantity per item is 1.';
-            if (!Number.isInteger(it.quantity)) errors[`materials.${idx}.quantity`] = 'Quantity for items must be a whole number.';
-          }
-          if (unit === 'kg' && it.quantity < 1) {
-            errors[`materials.${idx}.quantity`] = 'Minimum quantity is 1 kg.';
+          
+          // Apply validation rules based on user type
+          if (userType === 'user') {
+            if (unit === 'pieces' || unit === 'item') {
+              if (it.quantity < 1) {
+                errors[`materials.${idx}.quantity`] = 'For users, minimum quantity per item is 1.';
+              }
+              if (!Number.isInteger(it.quantity)) {
+                errors[`materials.${idx}.quantity`] = 'For users, quantity for items must be a whole number.';
+              }
+            }
+            if (unit === 'kg' && it.quantity < 1) {
+              errors[`materials.${idx}.quantity`] = 'For users, minimum quantity is 1 kg.';
+            }
+          } else if (userType === 'factory') {
+            if (unit === 'pieces' || unit === 'item') {
+              if (it.quantity < 1) {
+                errors[`materials.${idx}.quantity`] = 'For factories, minimum quantity per item is 1.';
+              }
+              if (!Number.isInteger(it.quantity)) {
+                errors[`materials.${idx}.quantity`] = 'For factories, quantity for items must be a whole number.';
+              }
+            }
+            if (unit === 'kg' && it.quantity < 100) {
+              errors[`materials.${idx}.quantity`] = 'For factories, minimum quantity is 100 kg (0.1 ton).';
+            }
           }
         }
+        
         materialIds.push(it.itemId || it.materialId);
       });
-      // duplicate check
+      
+      // Check for duplicate materials
       const uniqueIds = Array.from(new Set(materialIds));
       if (uniqueIds.length !== materialIds.length) {
         errors.materials = 'You cannot include the same material multiple times in one request.';
       }
     }
 
-    // contact phone
+    // contact phone: required, valid format, max 20 chars
     if (!formData.phoneNumber) {
       errors.contact_phone = 'Contact phone must be included.';
     } else if (!/^[0-9+\-\s()]+$/.test(formData.phoneNumber)) {
@@ -307,7 +475,7 @@ const RecyclingRequestPage = () => {
       errors.contact_phone = 'Contact phone cannot exceed 20 characters.';
     }
 
-    // notes max length
+    // notes: optional, max 1000 chars
     if (formData.notes && formData.notes.length > 1000) {
       errors.notes = 'Notes cannot exceed 1000 characters.';
     }
@@ -315,34 +483,53 @@ const RecyclingRequestPage = () => {
     setValidationErrors(errors);
 
     if (Object.keys(errors).length > 0) {
+      // Display validation errors at the top of the form
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
-    // Build payload to match backend
-    // If user didn't have saved addresses and entered a freeform address, create it first
+  // Build payload to match backend
+  // If user didn't have saved addresses and entered a freeform address, create it first
     let pickupAddressId = selectedAddressId;
+    setIsSubmitting(true);
+    setSubmissionError(null);
+    
     if (!pickupAddressId) {
       // create address via API (requires auth)
+      if (!token) {
+        setValidationErrors({ pickup_address_id: 'You must be logged in to create addresses.' });
+        setSubmissionError('You must be logged in to submit a recycling request.');
+        setIsSubmitting(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      
       try {
-        const addrRes = await fetch('http://localhost:8000/api/addresses', {
+        const addrRes = await fetch(`${apiBase}/addresses`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
           body: JSON.stringify({ street: formData.address, city: '' })
         });
         if (addrRes.ok) {
           const addrJson = await addrRes.json();
-          pickupAddressId = addrJson.data.address_id || addrJson.data.id;
+          const addrData = addrJson.data || addrJson;
+          pickupAddressId = String(addrData.address_id || addrData.id);
         } else {
           const err = await addrRes.json().catch(() => ({}));
           setValidationErrors({ pickup_address_id: err.message || 'Failed to create pickup address' });
+          setSubmissionError('Failed to create pickup address. Please try again.');
+          setIsSubmitting(false);
           window.scrollTo({ top: 0, behavior: 'smooth' });
           return;
         }
       } catch (err) {
         console.error('Failed to create address', err);
         setValidationErrors({ pickup_address_id: 'Failed to create pickup address' });
+        setSubmissionError('Network error while creating address. Please check your connection and try again.');
+        setIsSubmitting(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
@@ -352,44 +539,71 @@ const RecyclingRequestPage = () => {
       request_type: requestType,
       pickup_address_id: pickupAddressId,
       pickup_date: formData.pickupDate,
-      materials: selectedItems.map(si => ({ material_id: parseInt(si.itemId || si.materialId, 10), quantity: si.quantity })),
+      // Ensure backend expects numeric material_id referencing the material record
+      materials: selectedItems.map(si => ({ material_id: parseInt(si.materialId, 10) || parseInt(String(si.itemId).replace(/^item-/, ''), 10), quantity: si.quantity })),
       notes: formData.notes || null,
       contact_phone: formData.phoneNumber
     };
 
-    // Submit to backend (requires auth). Use credentials for Sanctum cookie auth.
-    (async () => {
-      try {
-        const res = await fetch('http://localhost:8000/api/requests', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify(payload)
-        });
+    // Submit to backend (requires auth)
+    if (!token) {
+      setSubmissionError('You must be logged in to submit a recycling request.');
+      setIsSubmitting(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
+    try {
+      const res = await fetch(`${apiBase}/requests`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
 
-        if (res.status === 201) {
-          // success
-          alert('Recycling request submitted successfully!');
-          // reset
-          setFormData({ fullName: '', phoneNumber: '', address: '', pickupDate: '', preferredTime: '', notes: '' });
-          setSelectedItems([]);
-          setTotalAmount(0);
-          setCurrentPage(1);
-        } else if (res.status === 422) {
-          const json = await res.json();
-          const serverErrors = json.errors || {};
-          setValidationErrors(serverErrors);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-          const json = await res.json();
-          alert(json.message || 'Failed to create recycling request');
-        }
-      } catch (err) {
-        console.error('Submit error', err);
-        alert('Failed to submit request. Check console for details.');
+      if (res.status === 201) {
+        // Success
+        const json = await res.json();
+        setSubmissionSuccess(true);
+        setSubmissionError(null);
+        
+        // Reset form
+        setFormData({ fullName: '', phoneNumber: '', address: '', pickupDate: '', preferredTime: '', notes: '' });
+        setSelectedItems([]);
+        setTotalAmount(0);
+        setCurrentPage(1);
+        
+        // Show success message
+        const requestId = json.data?.request_id || 'unknown';
+        const successMessage = `Your recycling request #${requestId} has been submitted successfully! You will receive a confirmation email shortly.`;
+        alert(successMessage);
+      } else if (res.status === 422) {
+        // Validation errors from server
+        const json = await res.json();
+        const serverErrors = json.errors || {};
+        setValidationErrors(serverErrors);
+        setSubmissionError('Please correct the errors in your form and try again.');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (res.status === 401 || res.status === 403) {
+        // Authentication/authorization errors
+        setSubmissionError('You must be logged in to submit a recycling request. Please log in and try again.');
+        window.location.href = '/login?redirect=/recycling-request';
+      } else {
+        // Other server errors
+        const json = await res.json().catch(() => ({}));
+        const errorMessage = json.message || `Server error (${res.status}). Please try again later.`;
+        setSubmissionError(errorMessage);
+        console.error('Server error:', json);
       }
-    })();
-    // Reset form
+    } catch (err) {
+      // Network or other errors
+      console.error('Submit error', err);
+      setSubmissionError('Network error. Please check your connection and try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const goToNextPage = () => {
@@ -780,15 +994,119 @@ const RecyclingRequestPage = () => {
                 </svg>
                 Phone Number
               </label>
-              <input
-                type="tel"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                placeholder="+1 (555) 123-4567"
-                required
-              />
+              {phoneNumbers && phoneNumbers.length > 0 ? (
+                <div className="flex items-start space-x-3">
+                  <div className="flex-1">
+                    <select
+                      name="phoneNumber"
+                      value={selectedPhoneId || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'add_new') {
+                          setShowAddPhoneForm(true);
+                          setFormData({...formData, phoneNumber: ''});
+                        } else {
+                          const selectedPhone = phoneNumbers.find(p => p.id === val);
+                          setSelectedPhoneId(val);
+                          setFormData({
+                            ...formData,
+                            phoneNumber: selectedPhone ? selectedPhone.number : ''
+                          });
+                          setShowAddPhoneForm(false);
+                        }
+                      }}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                      required
+                    >
+                              {phoneNumbers.map((phone) => (
+                                <option key={phone.id} value={phone.id}>
+                                  {phone.number}
+                                </option>
+                              ))}
+                      <option value="add_new">+ Add new phone number</option>
+                    </select>
+                  </div>
+                </div>
+              ) : (
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  placeholder="+1 (555) 123-4567"
+                  required
+                />
+              )}
+              
+              {showAddPhoneForm && (
+                <div className="mt-3 p-3 border border-gray-200 rounded-lg bg-gray-50">
+                  <div className="mb-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">New Phone Number</label>
+                    <div className="flex space-x-2">
+                      <input
+                        type="tel"
+                        value={newPhoneNumber}
+                        onChange={(e) => setNewPhoneNumber(e.target.value)}
+                        className="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                        placeholder="+1 (555) 123-4567"
+                      />
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (!newPhoneNumber.trim()) {
+                            setValidationErrors({ phone_number: 'Phone number is required.' });
+                            return;
+                          }
+                          
+                          if (!token) {
+                            setValidationErrors({ phone_number: 'You must be logged in to save phone numbers.' });
+                            return;
+                          }
+                          
+                          setIsCreatingPhone(true);
+                          try {
+                            const res = await fetch(`${apiBase}/phone-numbers`, {
+                              method: 'POST',
+                              headers: { 
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                              },
+                              body: JSON.stringify({ number: newPhoneNumber.trim() })
+                            });
+                            
+                            if (!res.ok) {
+                              const err = await res.json().catch(() => ({}));
+                              setValidationErrors({ phone_number: err.message || 'Failed to save phone number' });
+                              return;
+                            }
+                            
+                            const json = await res.json();
+                            const phoneData = json.data || json;
+                            const norm = { id: String(phoneData.id || phoneData.phone_id || phoneData.user_id), number: phoneData.number || phoneData.phone_number || phoneData.phone || '', raw: phoneData };
+                            const updated = [...phoneNumbers, norm];
+                            setPhoneNumbers(updated);
+                            setSelectedPhoneId(norm.id);
+                            setFormData({...formData, phoneNumber: norm.number});
+                            setShowAddPhoneForm(false);
+                            setNewPhoneNumber('');
+                            setValidationErrors({});
+                          } catch (err) {
+                            console.error('Create phone error', err);
+                            setValidationErrors({ phone_number: 'Failed to save phone number' });
+                          } finally {
+                            setIsCreatingPhone(false);
+                          }
+                        }}
+                        disabled={isCreatingPhone}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50"
+                      >
+                        {isCreatingPhone ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Pickup Address */}
@@ -811,7 +1129,7 @@ const RecyclingRequestPage = () => {
                         if (val === 'add_new') {
                           setShowAddAddressForm(true);
                         } else {
-                          setSelectedAddressId(Number(val));
+                          setSelectedAddressId(String(val));
                           setShowAddAddressForm(false);
                         }
                       }}
@@ -819,7 +1137,7 @@ const RecyclingRequestPage = () => {
                       required
                     >
                       {addresses.map((addr) => (
-                        <option key={addr.address_id || addr.id} value={addr.address_id || addr.id}>
+                        <option key={addr.id} value={addr.id}>
                           {addr.street}{addr.city ? ', ' + addr.city : ''}
                         </option>
                       ))}
