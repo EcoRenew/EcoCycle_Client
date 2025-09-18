@@ -19,14 +19,23 @@ export default function Login() {
   async function handleLogin(values, { setStatus }) {
     try {
       const res = await login(values.email, values.password);
+
       if (res.success) {
         setStatus({ type: "success", message: res.message });
         navigate("/");
       } else {
-        setStatus({ type: "error", message: res.message });
+        if (res.email_not_verified) {
+          setStatus({
+            type: "error",
+            message: res.message,
+          });
+        } else {
+          setStatus({ type: "error", message: res.message });
+        }
       }
     } catch (error) {
       console.log(error);
+      setStatus({ type: "error", message: "Something went wrong" });
     }
   }
 
