@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   MagnifyingGlassIcon,
   PlusIcon,
@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline';
 import ContentModal from '../components/ContentModal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { materialApi, categoryApi } from '../../services/adminApi';
 
 const ContentManagement = () => {
   const [activeTab, setActiveTab] = useState('materials');
@@ -18,43 +19,11 @@ const ContentManagement = () => {
   const [selectedContent, setSelectedContent] = useState(null);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [contentToDelete, setContentToDelete] = useState(null);
-
-  // Mock data - replace with actual API calls
-  const materials = [
-    {
-      material_id: 1,
-      material_name: 'Paper',
-      description: 'Recyclable paper materials including newspapers, magazines, and office paper',
-      price_per_unit: 2.50,
-      unit: 'kg',
-      category: 'Paper Products',
-      is_active: true,
-      image_url: '/images/paper.jpg',
-      created_at: '2024-01-10',
-    },
-    {
-      material_id: 2,
-      material_name: 'Plastic Bottles',
-      description: 'PET plastic bottles and containers',
-      price_per_unit: 1.80,
-      unit: 'pieces',
-      category: 'Plastics',
-      is_active: true,
-      image_url: '/images/plastic-bottles.jpg',
-      created_at: '2024-01-08',
-    },
-    {
-      material_id: 3,
-      material_name: 'Aluminum Cans',
-      description: 'Aluminum beverage cans and food containers',
-      price_per_unit: 3.20,
-      unit: 'kg',
-      category: 'Metals',
-      is_active: true,
-      image_url: '/images/aluminum-cans.jpg',
-      created_at: '2024-01-05',
-    },
-  ];
+  const [materials, setMaterials] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1 });
 
   const articles = [
     {
@@ -79,9 +48,33 @@ const ContentManagement = () => {
     },
   ];
 
-  const getCurrentData = () => {
-    return activeTab === 'materials' ? materials : articles;
-  };
+  const getCurrentData = () => (activeTab === 'materials' ? materials : articles);
+
+  async function loadMaterials(page = 1) {
+    try {
+      setLoading(true);
+      const { data } = await materialApi.getMaterials({ page, per_page: 10, search: searchTerm });
+      setMaterials((data?.data?.data || []).map(m => ({
+        ...m,
+        category_name: m.category?.category_name,
+      })));
+      setPagination({ current_page: data?.data?.current_page || 1, last_page: data?.data?.last_page || 1 });
+      setError(null);
+    } catch (e) {
+      setError('Failed to load materials');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadCategories() {
+    try {
+      const { data } = await categoryApi.getCategories({ per_page: 100 });
+      setCategories(data?.data?.data || []);
+    } catch {}
+  }
+
+  useEffect(() => { loadMaterials(); loadCategories(); }, []);
 
   const filteredData = getCurrentData().filter((item) => {
     const searchField = activeTab === 'materials' ? item.material_name : item.title;
@@ -103,9 +96,15 @@ const ContentManagement = () => {
     setIsConfirmDialogOpen(true);
   };
 
-  const confirmDelete = () => {
-    // Add API call here
-    console.log(`Deleting ${activeTab.slice(0, -1)} ${contentToDelete[activeTab === 'materials' ? 'material_id' : 'article_id']}`);
+  const confirmDelete = async () => {
+    if (activeTab === 'materials' && contentToDelete) {
+      try {
+        await materialApi.deleteMaterial(contentToDelete.material_id);
+        await loadMaterials(pagination.current_page);
+      } catch (e) {
+        setError('Failed to delete material');
+      }
+    }
     setIsConfirmDialogOpen(false);
     setContentToDelete(null);
   };
@@ -255,18 +254,12 @@ const ContentManagement = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.category}
+                        {item.category_name || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        ${item.price_per_unit.toFixed(2)}/{item.unit}
+                        ${Number(item.price_per_unit).toFixed(2)}/{item.unit}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                          item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {item.is_active ? 'Active' : 'Inactive'}
-                        </span>
-                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">-</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(item.created_at).toLocaleDateString()}
                       </td>
@@ -331,6 +324,19 @@ const ContentManagement = () => {
             </tbody>
           </table>
         </div>
+        <div className="flex items-center justify-end space-x-2 p-4">
+          <button
+            disabled={pagination.current_page <= 1}
+            onClick={() => loadMaterials(pagination.current_page - 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >Prev</button>
+          <span className="text-sm text-gray-600">Page {pagination.current_page} of {pagination.last_page}</span>
+          <button
+            disabled={pagination.current_page >= pagination.last_page}
+            onClick={() => loadMaterials(pagination.current_page + 1)}
+            className="px-3 py-1 border rounded disabled:opacity-50"
+          >Next</button>
+        </div>
       </div>
 
       {/* Content Modal */}
@@ -342,6 +348,8 @@ const ContentManagement = () => {
         }}
         content={selectedContent}
         contentType={activeTab}
+        categories={categories}
+        onSaved={async () => { setIsContentModalOpen(false); await loadMaterials(pagination.current_page); }}
       />
 
       {/* Confirmation Dialog */}

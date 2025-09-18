@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowUpIcon,
   ScaleIcon,
@@ -6,37 +6,81 @@ import {
   UsersIcon,
   BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
+import { 
+  FaRecycle, 
+  FaDonate, 
+  FaUsers, 
+  FaHandshake,
+  FaSpinner,
+  FaExclamationTriangle
+} from 'react-icons/fa';
 import StatsCard from '../components/StatsCard';
 import MetricsChart from '../components/MetricsChart';
 import QuickActions from '../components/QuickActions';
+import { dashboardApi } from '../../services/adminApi';
+
+const initialStats = {
+  total_users: 0,
+  total_products: 0,
+  total_requests: 0,
+  pending_requests: 0,
+};
 
 const AdminDashboard = () => {
+  const [liveStats, setLiveStats] = useState(initialStats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchDashboard() {
+      try {
+        setLoading(true);
+        const [statsRes] = await Promise.all([
+          dashboardApi.getStats(),
+          // Optionally: dashboardApi.getRecentActivities()
+        ]);
+        if (!isMounted) return;
+        const data = statsRes.data?.data || initialStats;
+        setLiveStats(data);
+        setError(null);
+      } catch (e) {
+        setError('Failed to load dashboard data');
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    fetchDashboard();
+    return () => { isMounted = false; };
+  }, []);
+
   const stats = [
     {
-      name: 'Total Recycled Weight',
-      value: '1,250 tons',
-      change: '+10%',
-      changeType: 'increase',
-      icon: ScaleIcon,
-    },
-    {
-      name: 'Number of Donations',
-      value: '8,750',
-      change: '+5%',
-      changeType: 'increase',
-      icon: HandRaisedIcon,
-    },
-    {
-      name: 'Active Users',
-      value: '5,500',
-      change: '+8%',
+      name: 'Total Users',
+      value: String(liveStats.total_users),
+      change: '+0%'
+      ,
       changeType: 'increase',
       icon: UsersIcon,
     },
     {
-      name: 'Partnerships',
-      value: '120',
-      change: '+12%',
+      name: 'Total Products',
+      value: String(liveStats.total_products),
+      change: '+0%',
+      changeType: 'increase',
+      icon: ScaleIcon,
+    },
+    {
+      name: 'Total Requests',
+      value: String(liveStats.total_requests),
+      change: '+0%',
+      changeType: 'increase',
+      icon: HandRaisedIcon,
+    },
+    {
+      name: 'Pending Requests',
+      value: String(liveStats.pending_requests),
+      change: '+0%',
       changeType: 'increase',
       icon: BuildingOfficeIcon,
     },
@@ -73,6 +117,16 @@ const AdminDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {loading && (
+        <div className="flex items-center text-gray-600">
+          <FaSpinner className="animate-spin mr-2" /> Loading dashboard...
+        </div>
+      )}
+      {error && (
+        <div className="flex items-center text-red-600">
+          <FaExclamationTriangle className="mr-2" /> {error}
+        </div>
+      )}
       {/* Welcome Message */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Administrator Dashboard</h1>

@@ -1,54 +1,99 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import api from "../services/api.js";
 import { CartContext } from "../context/CartContext.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
-export default function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem("cartItems");
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
+export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const { token } = useAuth(); // ✅ get token from auth
 
-  // Detect successful payment and clear cart
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("success") === "true") {
-      setCartItems([]);
-      localStorage.removeItem("cartItems");
-      //  remove the query param from URL
-      window.history.replaceState({}, document.title, window.location.pathname);
+  // Fetch cart from backend
+  const fetchCart = useCallback(async () => {
+    if (!token) return;
+    try {
+      setLoading(true);
+      const { data } = await api.get("/cart");
+      if (data.success) {
+        setCartItems(data.data.cart_products || []);
+      }
+    } catch (err) {
+      console.error("Fetch cart failed:", err);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [token]);
 
-  useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
+  //  Add product to cart
+  const addToCart = async (product, quantity = 1) => {
+    if (!token) {
+      alert("You must log in to add items to cart");
+      return;
+    }
+    try {
+      const { data } = await api.post("/cart", {
+        product_id: product.id,
+        quantity,
+      });
+      if (data.success) {
+        fetchCart();
+      }
+    } catch (err) {
+      console.error("Add to cart failed:", err);
+    }
+  };
 
-  const addToCart = (product) => {
-    setCartItems((prev) => {
-      const existingItem = prev.find((item) => item.id === product.id);
-      if (existingItem) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+  // Update cart item quantity
+  const updateCartItem = async (cartProductId, quantity) => {
+    if (!token) return;
+    try {
+      const { data } = await api.put(`/cart/${cartProductId}`, { quantity });
+      if (data.success) {
+        fetchCart();
+      }
+    } catch (err) {
+      console.error("Update cart failed:", err);
+    }
+  };
+
+  //  Remove from cart
+  const removeFromCart = async (cartProductId) => {
+    if (!token) return;
+    try {
+      const { data } = await api.delete(`/cart/${cartProductId}`);
+      if (data.success) {
+        setCartItems((prev) =>
+          prev.filter((item) => item.id !== cartProductId)
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
-    });
+    } catch (err) {
+      console.error("Remove cart item failed:", err);
+    }
   };
 
-  const removeFromCart = (id) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
+  //  React when token changes
+  useEffect(() => {
+    if (token) {
+      fetchCart();
+    } else {
+      setCartItems([]);
+    }
+  }, [token, fetchCart]);
 
   return (
-    <CartContext.Provider value={{ cartItems, addToCart, removeFromCart }}>
+    <CartContext.Provider
+      value={{
+        cartItems,
+        loading,
+        fetchCart,
+        addToCart,
+        updateCartItem,
+        removeFromCart,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
-}
+};
+
+export default CartProvider;

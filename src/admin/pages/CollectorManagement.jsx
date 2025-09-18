@@ -6,7 +6,6 @@ import {
   FaSearch,
   FaSpinner,
   FaExclamationTriangle,
-  FaFilter as FunnelIcon,
   FaAngleLeft,
   FaAngleRight,
   FaAngleDoubleLeft,
@@ -16,9 +15,8 @@ import UserModal from '../components/UserModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { userApi } from '../../services/adminApi';
 
-const UserManagement = () => {
+const CollectorManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -31,7 +29,7 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, selectedRole, searchTerm]);
+  }, [currentPage, searchTerm]);
 
   const fetchUsers = async () => {
     try {
@@ -40,15 +38,15 @@ const UserManagement = () => {
       const params = {
         page: currentPage,
         per_page: 10,
-        role: selectedRole !== 'all' ? selectedRole : undefined,
+        role: 'collector', // This component is specifically for collectors
         search: searchTerm || undefined
       };
       const response = await userApi.getUsers(params);
       setUsers(response.data.data.data);
       setTotalPages(response.data.data.last_page);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to fetch users');
-      console.error('Users fetch error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch collectors');
+      console.error('Collectors fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -71,13 +69,16 @@ const UserManagement = () => {
       setUserToDelete(null);
       fetchUsers(); // Refresh the list
     } catch (err) {
-      console.error('Delete user error:', err);
-      alert(err.response?.data?.message || 'Failed to delete user');
+      console.error('Delete collector error:', err);
+      alert(err.response?.data?.message || 'Failed to delete collector');
     }
   };
 
   const handleUserSave = async (userData) => {
     try {
+      // Ensure the role is set to collector
+      userData.role = 'collector';
+      
       if (selectedUser) {
         await userApi.updateUser(selectedUser.user_id, userData);
       } else {
@@ -87,23 +88,8 @@ const UserManagement = () => {
       setSelectedUser(null);
       fetchUsers(); // Refresh the list
     } catch (err) {
-      console.error('Save user error:', err);
+      console.error('Save collector error:', err);
       throw err; // Let the modal handle the error display
-    }
-  };
-
-  const getRoleBadgeColor = (role) => {
-    switch (role) {
-      case 'admin':
-        return 'bg-red-100 text-red-800';
-      case 'collector':
-        return 'bg-blue-100 text-blue-800';
-      case 'factory':
-        return 'bg-purple-100 text-purple-800';
-      case 'user':
-        return 'bg-green-100 text-green-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
     }
   };
 
@@ -118,8 +104,8 @@ const UserManagement = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">User Accounts</h1>
-          <p className="text-gray-600 mt-1">Manage user accounts and permissions</p>
+          <h1 className="text-2xl font-bold text-gray-900">Collector Management</h1>
+          <p className="text-gray-600 mt-1">Manage recycling collectors</p>
         </div>
         <button
           onClick={() => {
@@ -129,7 +115,7 @@ const UserManagement = () => {
           className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-ecoGreen hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ecoGreen"
         >
           <FaPlus className="h-4 w-4 mr-2" />
-          Add User
+          Add Collector
         </button>
       </div>
 
@@ -142,29 +128,11 @@ const UserManagement = () => {
               <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search users..."
+                placeholder="Search collectors..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen"
               />
-            </div>
-          </div>
-          
-          {/* Role Filter */}
-          <div className="sm:w-48">
-            <div className="relative">
-              <FunnelIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <select
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-                className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-ecoGreen focus:border-ecoGreen appearance-none"
-              >
-                <option value="all">All Roles</option>
-                <option value="admin">Admin</option>
-                <option value="collector">Collector</option>
-                <option value="factory">Factory</option>
-                <option value="user">Customer</option>
-              </select>
             </div>
           </div>
         </div>
@@ -177,13 +145,10 @@ const UserManagement = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  User
+                  Collector
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Contact
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -202,16 +167,15 @@ const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-ecoGreen flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center">
                           <span className="text-sm font-medium text-white">
-                            {/* {user.full_name.charAt(0)} */}
-                            
+                            {user.full_name ? user.full_name.charAt(0) : user.name.charAt(0)}
                           </span>
                         </div>
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {user.full_name}
+                          {user.full_name || user.name}
                         </div>
                         <div className="text-sm text-gray-500">ID: {user.user_id}</div>
                       </div>
@@ -220,11 +184,6 @@ const UserManagement = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{user.email}</div>
                     <div className="text-sm text-gray-500">{user.phone}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadgeColor(user.role)}`}>
-                      {user.role}
-                    </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadgeColor(user.status)}`}>
@@ -239,14 +198,14 @@ const UserManagement = () => {
                       <button
                         onClick={() => handleEditUser(user)}
                         className="text-ecoGreen hover:text-green-600 p-1"
-                        title="Edit user"
+                        title="Edit collector"
                       >
                         <FaEdit className="h-4 w-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteUser(user)}
                         className="text-red-600 hover:text-red-800 p-1"
-                        title="Delete user"
+                        title="Delete collector"
                       >
                         <FaTrash className="h-4 w-4" />
                       </button>
@@ -345,9 +304,9 @@ const UserManagement = () => {
         {!loading && users.length === 0 && (
           <div className="px-6 py-10 text-center">
             <FaExclamationTriangle className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">No collectors found</h3>
             <p className="mt-1 text-sm text-gray-500">
-              Try adjusting your search or filter to find what you're looking for.
+              Try adjusting your search to find what you're looking for.
             </p>
           </div>
         )}
@@ -356,7 +315,7 @@ const UserManagement = () => {
         {loading && (
           <div className="px-6 py-10 text-center">
             <FaSpinner className="mx-auto h-12 w-12 text-gray-400 animate-spin" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">Loading users...</h3>
+            <h3 className="mt-2 text-sm font-medium text-gray-900">Loading collectors...</h3>
           </div>
         )}
       </div>
@@ -369,6 +328,8 @@ const UserManagement = () => {
           setSelectedUser(null);
         }}
         user={selectedUser}
+        onSave={handleUserSave}
+        defaultRole="collector"
       />
 
       {/* Delete Confirmation Dialog */}
@@ -379,8 +340,8 @@ const UserManagement = () => {
           setUserToDelete(null);
         }}
         onConfirm={confirmDelete}
-        title="Delete User"
-        message={`Are you sure you want to delete ${userToDelete?.full_name}? This action cannot be undone.`}
+        title="Delete Collector"
+        message={`Are you sure you want to delete ${userToDelete?.full_name || userToDelete?.name}? This action cannot be undone.`}
         confirmText="Delete"
         confirmButtonClass="bg-red-600 hover:bg-red-700 focus:ring-red-500"
       />
@@ -388,4 +349,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default CollectorManagement;
