@@ -7,7 +7,7 @@ const UserInspirationCard = ({ inspiration }) => (
       <h3 className="font-semibold text-gray-900 mb-1">{inspiration.title}</h3>
       <p className="text-gray-600 text-sm mb-3">{inspiration.description}</p>
       <div className="flex items-center justify-between text-sm text-gray-500">
-        <div className="flex items-center gap-1"><User className="w-4 h-4" />{inspiration.author}</div>
+        <div className="flex items-center gap-1"><User className="w-4 h-4" />{inspiration.author.name}</div>
         <span>{inspiration.timeAgo}</span>
       </div>
     </div>

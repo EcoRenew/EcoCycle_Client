@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import { FaTimes, FaSpinner } from 'react-icons/fa';
 
-const UserModal = ({ isOpen, onClose, user }) => {
+const UserModal = ({ isOpen, onClose, user, onSave }) => {
   const [formData, setFormData] = useState({
-    full_name: '',
+    name: '',
     email: '',
     phone: '',
-    role: 'customer',
+    role: 'user',
     password: '',
     confirmPassword: '',
   });
@@ -17,19 +17,19 @@ const UserModal = ({ isOpen, onClose, user }) => {
   useEffect(() => {
     if (user) {
       setFormData({
-        full_name: user.full_name || '',
+        name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-        role: user.role || 'customer',
+        role: user.role || 'user',
         password: '',
         confirmPassword: '',
       });
     } else {
       setFormData({
-        full_name: '',
+        name: '',
         email: '',
         phone: '',
-        role: 'customer',
+        role: 'user',
         password: '',
         confirmPassword: '',
       });
@@ -55,8 +55,8 @@ const UserModal = ({ isOpen, onClose, user }) => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.full_name.trim()) {
-      newErrors.full_name = 'Full name is required';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
     }
 
     if (!formData.email.trim()) {
@@ -65,20 +65,18 @@ const UserModal = ({ isOpen, onClose, user }) => {
       newErrors.email = 'Email is invalid';
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    }
-
     if (!user) { // Only validate password for new users
       if (!formData.password) {
         newErrors.password = 'Password is required';
-      } else if (formData.password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters';
+      } else if (formData.password.length < 8) {
+        newErrors.password = 'Password must be at least 8 characters';
       }
 
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
       }
+    } else if (formData.password && formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     setErrors(newErrors);
@@ -95,15 +93,27 @@ const UserModal = ({ isOpen, onClose, user }) => {
     setIsSubmitting(true);
     
     try {
-      // Add API call here
-      console.log('Submitting user data:', formData);
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const submitData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        role: formData.role,
+      };
+
+      // Only include password if it's provided
+      if (formData.password) {
+        submitData.password = formData.password;
+      }
+
+      await onSave(submitData);
       onClose();
     } catch (error) {
       console.error('Error saving user:', error);
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      } else {
+        setErrors({ general: error.response?.data?.message || 'Failed to save user' });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -126,28 +136,28 @@ const UserModal = ({ isOpen, onClose, user }) => {
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <XMarkIcon className="h-6 w-6" />
+                <FaTimes className="h-6 w-6" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Full Name */}
               <div>
-                <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                   Full Name
                 </label>
                 <input
                   type="text"
-                  id="full_name"
-                  name="full_name"
-                  value={formData.full_name}
+                  id="name"
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-ecoGreen focus:border-ecoGreen ${
-                    errors.full_name ? 'border-red-300' : 'border-gray-300'
+                    errors.name ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
-                {errors.full_name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
                 )}
               </div>
 

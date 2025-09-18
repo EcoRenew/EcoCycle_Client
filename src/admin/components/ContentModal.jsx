@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
+import { materialApi } from '../../services/adminApi';
 import {
   XMarkIcon,
   PhotoIcon,
   DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 
-const ContentModal = ({ isOpen, onClose, content, contentType }) => {
+const ContentModal = ({ isOpen, onClose, content, contentType, categories = [], onSaved }) => {
   const [formData, setFormData] = useState({
     // Material fields
     material_name: '',
     description: '',
     price_per_unit: '',
     unit: 'kg',
-    category: '',
-    is_active: true,
+    category_id: '',
     image_url: '',
     
     // Article fields
@@ -36,8 +36,7 @@ const ContentModal = ({ isOpen, onClose, content, contentType }) => {
         description: '',
         price_per_unit: '',
         unit: 'kg',
-        category: '',
-        is_active: true,
+        category_id: '',
         image_url: '',
         title: '',
         content: '',
@@ -77,8 +76,8 @@ const ContentModal = ({ isOpen, onClose, content, contentType }) => {
       if (!formData.price_per_unit || formData.price_per_unit <= 0) {
         newErrors.price_per_unit = 'Valid price is required';
       }
-      if (!formData.category.trim()) {
-        newErrors.category = 'Category is required';
+      if (!formData.category_id) {
+        newErrors.category_id = 'Category is required';
       }
     } else {
       if (!formData.title.trim()) {
@@ -93,30 +92,34 @@ const ContentModal = ({ isOpen, onClose, content, contentType }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
       return;
     }
 
-    // Add API call here
-    console.log('Submitting:', formData);
-    onClose();
+    try {
+      const payload = {
+        material_name: formData.material_name,
+        price_per_unit: Number(formData.price_per_unit),
+        unit: formData.unit === 'pieces' ? 'item' : formData.unit,
+        category_id: formData.category_id,
+      };
+      if (content) {
+        await materialApi.updateMaterial(content.material_id, payload);
+      } else {
+        await materialApi.createMaterial(payload);
+      }
+      if (onSaved) await onSaved();
+      onClose();
+    } catch (err) {
+      // Basic error surfacing
+      setErrors({ submit: err.response?.data?.message || 'Save failed' });
+    }
   };
 
-  const materialCategories = [
-    'Paper Products',
-    'Plastics',
-    'Metals',
-    'Glass',
-    'Electronics',
-    'Textiles',
-    'Organic Waste',
-    'Other'
-  ];
-
-  const units = ['kg', 'pieces', 'liters', 'tons'];
+  const units = ['kg', 'pieces'];
   const articleStatuses = ['draft', 'published', 'archived'];
 
   return (
@@ -172,20 +175,20 @@ const ContentModal = ({ isOpen, onClose, content, contentType }) => {
                     Category *
                   </label>
                   <select
-                    name="category"
-                    value={formData.category}
+                    name="category_id"
+                    value={formData.category_id}
                     onChange={handleInputChange}
                     className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ecoGreen ${
-                      errors.category ? 'border-red-500' : 'border-gray-300'
+                      errors.category_id ? 'border-red-500' : 'border-gray-300'
                     }`}
                   >
                     <option value="">Select category</option>
-                    {materialCategories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
+                    {categories.map(cat => (
+                      <option key={cat.category_id} value={cat.category_id}>{cat.category_name}</option>
                     ))}
                   </select>
-                  {errors.category && (
-                    <p className="mt-1 text-sm text-red-600">{errors.category}</p>
+                  {errors.category_id && (
+                    <p className="mt-1 text-sm text-red-600">{errors.category_id}</p>
                   )}
                 </div>
 
@@ -260,18 +263,7 @@ const ContentModal = ({ isOpen, onClose, content, contentType }) => {
                 />
               </div>
 
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  name="is_active"
-                  checked={formData.is_active}
-                  onChange={handleInputChange}
-                  className="h-4 w-4 text-ecoGreen focus:ring-ecoGreen border-gray-300 rounded"
-                />
-                <label className="ml-2 block text-sm text-gray-700">
-                  Active (visible to users)
-                </label>
-              </div>
+              <div />
             </>
           ) : (
             // Article Form Fields
