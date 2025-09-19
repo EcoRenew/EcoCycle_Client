@@ -85,19 +85,19 @@ export function AuthProvider({ children }) {
       setLoading(false);
       return;
     }
-    
+
     try {
       const res = await axios.get(`${API_URL}/users/me`, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
-      
+
       if (res.data.success) {
         setUser(res.data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch user data:', error);
+      console.error("Failed to fetch user data:", error);
       // If token is invalid, clear it
       if (error.response?.status === 401) {
         setToken(null);
@@ -109,18 +109,23 @@ export function AuthProvider({ children }) {
     }
   }
 
-  function logout() {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem("token");
-  }
-
   useEffect(() => {
     fetchUser();
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading, fetchUser,logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        login,
+        register,
+        logout,
+        loading,
+        fetchUser,
+        verifyEmail,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -24,6 +24,7 @@ import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
+import GuestRoute from "../components/GuestRoute/GuestRoute";
 
 const router = createBrowserRouter([
   {
@@ -35,8 +36,22 @@ const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
+      {
+        path: "login",
+        element: (
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <GuestRoute>
+            <Register />
+          </GuestRoute>
+        ),
+      },
       { path: "faq", element: <FAQPage /> },
       { path: "category/:type", element: <CategoryPage /> },
       { path: "events", element: <EventsPage /> },
