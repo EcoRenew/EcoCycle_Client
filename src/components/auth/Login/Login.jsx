@@ -18,6 +18,7 @@ export default function Login() {
   async function handleLogin(values, { setStatus }) {
     try {
       const res = await login(values.email, values.password);
+
       if (res.success) {
         setStatus({ type: "success", message: res.message });
         navigate("/");
