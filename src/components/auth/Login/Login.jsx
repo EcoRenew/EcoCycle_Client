@@ -163,12 +163,12 @@ export default function Login() {
               <GoogleButton />
               <AuthSwitchLink>
                 <span className="dark:text-white/60">New to EcoCycle?</span>
-                {/* <Link
-                  to=""
+                <Link
+                  to="/register"
                   className="font-medium text-primary-600 hover:text-primary-500"
                 >
                   Register now
-                </Link> */}
+                </Link>
               </AuthSwitchLink>
             </div>
           </div>
