@@ -26,6 +26,7 @@ import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
+import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,7 @@ const router = createBrowserRouter([
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
       { path: "profile", element: <UserPage /> },
+      { path: "payment-success", element: <PaymentSuccess /> },
     ],
   },
   {
