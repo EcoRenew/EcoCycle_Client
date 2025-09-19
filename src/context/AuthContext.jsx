@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query"; // ✅ NEW: import queryClient
 const API_URL = import.meta.env.VITE_API_URL;
 
 const AuthContext = createContext();
@@ -8,6 +9,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient(); // ✅ NEW: access queryClient inside AuthProvider
 
   async function register(name, email, password) {
     try {
@@ -71,6 +73,9 @@ export function AuthProvider({ children }) {
       setUser(null);
       setToken(null);
       localStorage.removeItem("token");
+
+      queryClient.removeQueries({ queryKey: ["cart"] }); // ✅ NEW: clear cart cache on logout
+
       return { success: true, message: "Logged out successfully" };
     } catch (error) {
       return {
@@ -98,7 +103,6 @@ export function AuthProvider({ children }) {
       }
     } catch (error) {
       console.error("Failed to fetch user data:", error);
-      // If token is invalid, clear it
       if (error.response?.status === 401) {
         setToken(null);
         setUser(null);

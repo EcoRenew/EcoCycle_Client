@@ -25,6 +25,7 @@ import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
+import UserPage from "../pages/UserPage";
 
 const router = createBrowserRouter([
   {
@@ -59,6 +60,7 @@ const router = createBrowserRouter([
       { path: "diy", element: <DIYPage /> },
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
+      { path: "profile", element: <UserPage /> },
     ],
   },
   {
@@ -80,9 +82,18 @@ const router = createBrowserRouter([
           { index: true, element: <AdminDashboard /> },
           { path: "users", element: <UserManagement /> },
           { path: "content", element: <ContentManagement /> },
-          { path: "content/articles", element: <ContentManagement type="articles" /> },
-          { path: "categories", element: <ContentManagement type="categories" /> },
-          { path: "materials", element: <ContentManagement type="materials" /> },
+          {
+            path: "content/articles",
+            element: <ContentManagement type="articles" />,
+          },
+          {
+            path: "categories",
+            element: <ContentManagement type="categories" />,
+          },
+          {
+            path: "materials",
+            element: <ContentManagement type="materials" />,
+          },
           { path: "donations", element: <DonationRequests /> },
           { path: "partnerships", element: <Partnerships /> },
           { path: "settings", element: <Settings /> },

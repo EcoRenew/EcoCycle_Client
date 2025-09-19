@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
 import { useCart } from "../hooks/useCart";
@@ -6,30 +5,19 @@ import { createStripeCheckoutSession } from "../services/stripeService";
 import { useAuth } from "../context/AuthContext";
 
 const CartSidebar = ({ isOpen, onClose }) => {
-  const {
-    cartItems,
-    addToCart,
-    removeFromCart,
-    loading,
-    isAuthenticated,
-    fetchCart,
-    updateCartItem,
-  } = useCart();
+  const { cartItems, addToCart, removeFromCart, updateCartItem, isLoading } =
+    useCart();
+
   const { token, user } = useAuth();
-  // Refresh cart when sidebar opens
-  useEffect(() => {
-    if (isOpen && isAuthenticated) fetchCart();
-  }, [isOpen, isAuthenticated, fetchCart]);
 
   if (!isOpen) return null;
 
-  // get token
-
+  // ✅ Checkout handler
   const handleCheckout = async () => {
-    // if (!user) {
-    //   alert("Please login first!");
-    //   return;
-    // }
+    if (!user) {
+      alert("Please login first!");
+      return;
+    }
 
     const products = cartItems
       .filter((item) => (item.product || item)?.id)
@@ -44,26 +32,30 @@ const CartSidebar = ({ isOpen, onClose }) => {
     }
 
     try {
-      const session = await createStripeCheckoutSession(products, token); // pass token
+      const session = await createStripeCheckoutSession(products, token);
       window.location.href = session.url;
     } catch (err) {
       console.error("Checkout error:", err);
       alert("Failed to start checkout. Try again.");
     }
   };
+
+  // ✅ Handle + and - buttons
   const handleAdd = (product) => {
     if (!product?.id) return;
-    addToCart(product, 1);
+    addToCart.mutate({ product, quantity: 1 });
   };
+
   const handleRemove = (item) => {
     if (!item?.id) return;
 
     if (item.quantity > 1) {
-      // Decrease quantity by 1
-      updateCartItem(item.id, item.quantity - 1);
+      updateCartItem.mutate({
+        cartProductId: item.id,
+        quantity: item.quantity - 1,
+      });
     } else {
-      // If quantity = 1, remove completely
-      removeFromCart(item.id);
+      removeFromCart.mutate(item.id);
     }
   };
 
@@ -84,7 +76,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        {loading ? (
+        {isLoading ? (
           <p>Loading...</p>
         ) : cartItems.length === 0 ? (
           <p>Cart is empty</p>
@@ -126,6 +118,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                       <span className="px-3 py-1 bg-gray-100 dark:text-black">
                         {item.quantity}
                       </span>
+
                       <button
                         onClick={() => handleAdd(product)}
                         disabled={item.quantity >= (product?.stock || 0)}
