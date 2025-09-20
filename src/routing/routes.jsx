@@ -61,6 +61,7 @@ const router = createBrowserRouter([
       { path: "diy", element: <DIYPage /> },
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
+      { path: "customer-details", element: <RecyclingRequestPage /> },
       { path: "profile", element: <UserPage /> },
       { path: "payment-success", element: <PaymentSuccess /> },
       { path: "auth/callback", element: <GoogleCallback /> },

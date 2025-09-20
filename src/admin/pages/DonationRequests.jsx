@@ -271,71 +271,94 @@ const DonationRequests = () => {
     });
   };
 
-  // Handle form submission for edit - using mock implementation
+  // Handle form submission for edit
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Simulate API delay
-      setTimeout(() => {
-        // Update local state
-        setRequests(requests.map(req => 
-          req.id === selectedRequest.id ? { ...req, ...editFormData } : req
-        ));
-        
-        setIsEditModalOpen(false);
-      }, 300);
+      const response = await fetch(`http://localhost:8000/api/admin/requests/${selectedRequest.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(editFormData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update request');
+      }
+      
+      // Update local state
+      setRequests(requests.map(req => 
+        req.id === selectedRequest.id ? editFormData : req
+      ));
+      
+      setIsEditModalOpen(false);
+      
     } catch (err) {
       console.error('Error updating request:', err);
       alert('Failed to update request. Please try again.');
     }
   };
 
-  // Handle form submission for create - using mock implementation
+  // Handle form submission for create
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Simulate API delay
-      setTimeout(() => {
-        // Create a new request with a mock ID
-        const newRequest = { 
-          ...createFormData, 
-          id: Date.now(),
-          created_at: new Date().toISOString().split('T')[0],
-          request_type: createFormData.material_type.toLowerCase().includes('electronics') ? 'donation' : 'recycling'
-        };
-        
-        // Add new request to local state
-        setRequests([newRequest, ...requests]);
-        
-        // Reset form and close modal
-        setCreateFormData({
-          requester_name: '',
-          email: '',
-          phone: '',
-          material_type: '',
-          quantity: '',
-          pickup_address: '',
-          preferred_date: '',
-          notes: '',
-          status: 'pending'
-        });
-        setIsCreateModalOpen(false);
-      }, 300);
+      const response = await fetch('http://localhost:8000/api/admin/requests', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(createFormData),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create request');
+      }
+      
+      const result = await response.json();
+      
+      // Add new request to local state
+      setRequests([...requests, result.data]);
+      
+      // Reset form and close modal
+      setCreateFormData({
+        requester_name: '',
+        email: '',
+        phone: '',
+        material_type: '',
+        quantity: '',
+        pickup_address: '',
+        preferred_date: '',
+        notes: '',
+        status: 'pending'
+      });
+      setIsCreateModalOpen(false);
+      
     } catch (err) {
       console.error('Error creating request:', err);
       alert('Failed to create request. Please try again.');
     }
   };
 
-  // Handle delete confirmation - using mock implementation
+  // Handle delete confirmation
   const handleDeleteConfirm = async () => {
     try {
-      // Simulate API delay
-      setTimeout(() => {
-        // Update local state
-        setRequests(requests.filter(req => req.id !== selectedRequest.id));
-        setIsDeleteModalOpen(false);
-      }, 300);
+      const response = await fetch(`http://localhost:8000/api/admin/requests/${selectedRequest.id}`, {
+        method: 'DELETE',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete request');
+      }
+      
+      // Update local state
+      setRequests(requests.filter(req => req.id !== selectedRequest.id));
+      setIsDeleteModalOpen(false);
+      
     } catch (err) {
       console.error('Error deleting request:', err);
       alert('Failed to delete request. Please try again.');
