@@ -27,7 +27,7 @@ import RecyclingRequestPage from "../pages/RecyclingRequestPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
 import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
-
+import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -63,6 +63,7 @@ const router = createBrowserRouter([
       { path: "recycling-request", element: <RecyclingRequestPage /> },
       { path: "profile", element: <UserPage /> },
       { path: "payment-success", element: <PaymentSuccess /> },
+      { path: "auth/callback", element: <GoogleCallback /> },
     ],
   },
   {
