@@ -24,6 +24,7 @@ import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
+import DonationPage from "../pages/DonationPage";
 
 const router = createBrowserRouter([
   {
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { path: "diy", element: <DIYPage /> },
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
+      { path: "donate", element: <DonationPage /> },
     ],
   },
   {
