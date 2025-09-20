@@ -28,7 +28,6 @@ import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
 import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
 import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
-
 const router = createBrowserRouter([
   {
     path: "/",
