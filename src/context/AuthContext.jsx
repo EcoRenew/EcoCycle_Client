@@ -84,6 +84,16 @@ export function AuthProvider({ children }) {
       };
     }
   }
+  async function googleLogin(token, user) {
+    try {
+      setToken(token);
+      setUser(user);
+      localStorage.setItem("token", token);
+      return { success: true, user, token };
+    } catch (error) {
+      return { success: false, message: "Google login failed" };
+    }
+  }
 
   async function fetchUser() {
     if (!token) {
@@ -128,6 +138,7 @@ export function AuthProvider({ children }) {
         loading,
         fetchUser,
         verifyEmail,
+        googleLogin,
       }}
     >
       {children}
