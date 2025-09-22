@@ -10,23 +10,21 @@ import { Link, useNavigate } from "react-router-dom";
 import ColorModeSwitch from "./ColorModeSwitch";
 import CartSidebar from "./CartSidebar";
 import CartButton from "./CartButton";
-import UserDropdown from "./UserDropdown";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
-import { useAuth } from "../context/AuthContext"; // ✅ import auth hook
+import { useAuth } from "../context/AuthContext";
 
 const NavbarComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const { user } = useAuth(); // ✅ check if logged in
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const handleUserClick = () => {
     if (!user) {
-      navigate("/register"); // redirect to register if not logged in
+      navigate("/register");
     } else {
-      setUserDropdownOpen(true); // open dropdown if logged in
+      navigate("/profile");
     }
   };
 
@@ -39,7 +37,6 @@ const NavbarComponent = () => {
             icon={faRecycle}
             className="text-[#38af44] animate-spin-slow !w-9 !h-9 stroke-[40]"
           />
-
           <span className="text-2xl font-bold">EcoCycle</span>
         </Link>
 
@@ -50,22 +47,10 @@ const NavbarComponent = () => {
 
         {/* Right Side */}
         <div className="flex items-center space-x-4">
-          {/* User Icon / Dropdown */}
-          <div className="relative">
-            <button
-              className="hover:text-gray-500"
-              onClick={handleUserClick}
-              onMouseEnter={() => user && setUserDropdownOpen(true)}
-            >
-              <FontAwesomeIcon icon={faUser} size="lg" />
-            </button>
-            {user && (
-              <UserDropdown
-                isOpen={userDropdownOpen}
-                onClose={() => setUserDropdownOpen(false)}
-              />
-            )}
-          </div>
+          {/* User Icon */}
+          <button className="hover:text-gray-500" onClick={handleUserClick}>
+            <FontAwesomeIcon icon={faUser} size="lg" />
+          </button>
 
           {/* Cart */}
           <CartButton onClick={() => setCartOpen(true)} />

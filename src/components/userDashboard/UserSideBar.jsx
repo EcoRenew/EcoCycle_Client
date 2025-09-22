@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import UserProfile from "./UserProfile";
 import DashboardMenu from "./DashboardMenu";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,7 +14,6 @@ const UserSideBar = () => {
         className={`fixed lg:static top-0 left-0 min-h-screen w-72 bg-white dark:bg-[#25432E] shadow-md transform transition-transform duration-300 z-40
         ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
       >
-        {/* Header with close button (only on small screens) */}
         <div className="flex items-center justify-between p-4 lg:hidden">
           <h2 className="text-lg font-semibold text-gray-700 dark:text-white">
             Menu
@@ -33,7 +32,6 @@ const UserSideBar = () => {
         </div>
       </aside>
 
-      {/* Open button (small screens, NOT fixed anymore) */}
       {!isOpen && (
         <div className="lg:hidden p-4">
           <button
@@ -45,7 +43,6 @@ const UserSideBar = () => {
         </div>
       )}
 
-      {/* Overlay (only small screens) */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
