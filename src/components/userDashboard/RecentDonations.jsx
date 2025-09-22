@@ -1,35 +1,15 @@
 import React from "react";
-import { useUserDashboard } from "../../hooks/useUserDashboard";
 
-const RecentDonations = () => {
-  const { data, isLoading, isError, error } = useUserDashboard();
-
-  if (isLoading) {
-    return (
-      <div className="bg-white dark:bg-[#25432E] rounded-2xl shadow-md p-6">
-        <p className="text-gray-500 dark:text-gray-300">Loading donations...</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="bg-white dark:bg-[#25432E] rounded-2xl shadow-md p-6">
-        <p className="text-red-500">Error: {error.message}</p>
-      </div>
-    );
-  }
-
+const RecentDonations = ({ pickups }) => {
   const donations =
-    data?.upcoming_pickups?.filter(
-      (pickup) => pickup.request_type === "Donation"
-    ) || [];
+    pickups?.filter((pickup) => pickup.request_type === "Donation") || [];
 
   return (
     <div className="bg-white dark:bg-[#25432E] rounded-2xl shadow-md p-6">
       <h3 className="text-lg font-semibold dark:text-white text-gray-800 mb-4">
         Recent Donations
       </h3>
+
       {donations.length === 0 ? (
         <p className="text-gray-500 dark:text-gray-300">No recent donations.</p>
       ) : (

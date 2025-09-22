@@ -1,9 +1,7 @@
-import { useCart } from "../hooks/useCart";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart } from "@fortawesome/free-solid-svg-icons";
 
-const CartButton = ({ onClick }) => {
-  const { cartItems } = useCart();
+const CartButton = ({ cartItems, onClick }) => {
   const items = Array.isArray(cartItems) ? cartItems : [];
   const totalItems = items.reduce((acc, item) => acc + (item.quantity || 1), 0);
 

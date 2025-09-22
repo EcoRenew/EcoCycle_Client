@@ -48,8 +48,8 @@ const UserPage = () => {
 
         {/* Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <UpcomingPickups />
-          <RecentDonations />
+          <UpcomingPickups pickups={data?.upcoming_pickups || []} />
+          <RecentDonations pickups={data?.upcoming_pickups || []} />
         </div>
       </div>
     </div>

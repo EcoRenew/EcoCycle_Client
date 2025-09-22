@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useCart } from "../hooks/useCart";
-import { useAuth } from "../context/AuthContext"; // ✅ import auth
+import { useCartContext } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShoppingCart, faBell } from "@fortawesome/free-solid-svg-icons";
+import { faShoppingCart, faStar } from "@fortawesome/free-solid-svg-icons";
+import api from "../services/api";
 
 const ProductCard = ({ product }) => {
-  const { addToCart } = useCart();
-  const { user } = useAuth(); // ✅ check if logged in
-  const [message, setMessage] = useState(""); // ✅ store message
+  const { addToCart } = useCartContext();
+  const { user } = useAuth();
+  const [message, setMessage] = useState("");
 
   if (!product) return null;
 
@@ -15,11 +16,38 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     if (!user) {
-      setMessage("Please login to add items to your cart."); // ✅ show message
+      setMessage("Please login to add items to your cart.");
       return;
     }
     addToCart.mutate({ product, quantity: 1 });
-    setMessage(""); // ✅ clear message if successful
+    setMessage("");
+  };
+
+  const handleBuyWithPoints = async () => {
+    if (!user) {
+      setMessage("Please login to buy with points.");
+      return;
+    }
+
+    if (user.recycling_points < product.points_price) {
+      setMessage("Not enough points to buy this product.");
+      return;
+    }
+
+    try {
+      const response = await api.post("/cart/buy-with-points", {
+        product_id: product.id,
+        quantity: 1,
+      });
+
+      if (response.data.success) {
+        setMessage("Purchase successful! 🎉");
+      } else {
+        setMessage(response.data.message || "Not enough points.");
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Error during purchase.");
+    }
   };
 
   return (
@@ -54,15 +82,33 @@ const ProductCard = ({ product }) => {
             <FontAwesomeIcon icon={faShoppingCart} className="text-2xl" />
           </button>
 
-          {/* Notify button */}
-          <button className="p-3 rounded-full bg-ecoGreen text-white shadow-md hover:scale-110 hover:shadow-lg transition-transform duration-300">
-            <FontAwesomeIcon icon={faBell} className="text-2xl" />
+          {/* Buy with Points button */}
+          <button
+            onClick={handleBuyWithPoints}
+            disabled={
+              isOutOfStock ||
+              (user && user.recycling_points < product.points_price)
+            }
+            className={`p-3 rounded-full shadow-md transition-transform duration-300 bg-yellow-500 text-white hover:scale-110 hover:shadow-lg ${
+              user && user.recycling_points < product.points_price
+                ? "opacity-50 cursor-not-allowed"
+                : ""
+            }`}
+            aria-label={`Buy ${product.name} with points`}
+          >
+            <FontAwesomeIcon icon={faStar} className="text-2xl" />
           </button>
         </div>
 
-        {/* Price / Stock label */}
-        <div className="absolute bottom-4 left-4 bg-ecoGreen text-white text-sm font-bold px-3 py-1 rounded-full shadow-md opacity-90 transition-opacity duration-300 group-hover:opacity-100">
-          {isOutOfStock ? "Out of Stock" : `${product.price} LE`}
+        {/* Price / Points labels */}
+        <div className="absolute bottom-4 left-4 flex flex-col gap-1">
+          <div className="bg-ecoGreen text-white text-sm font-bold px-3 py-1 rounded-full shadow-md opacity-90 transition-opacity duration-300 group-hover:opacity-100">
+            {isOutOfStock ? "Out of Stock" : `${product.price} LE`}
+          </div>
+
+          <div className="bg-yellow-500 text-white text-sm font-bold px-3 py-1 rounded-full shadow-md opacity-90 transition-opacity duration-300 group-hover:opacity-100">
+            {isOutOfStock ? "Out of Stock" : `${product.points_price} pts`}
+          </div>
         </div>
       </div>
 
@@ -75,7 +121,7 @@ const ProductCard = ({ product }) => {
           {product.description || "High-quality eco-friendly product."}
         </p>
 
-        {/* ✅ Show login message */}
+        {/* Show messages */}
         {message && (
           <p className="mt-3 text-sm text-red-500 font-medium">{message}</p>
         )}

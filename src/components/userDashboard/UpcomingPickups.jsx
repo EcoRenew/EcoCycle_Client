@@ -1,33 +1,4 @@
-import React from "react";
-import { useUserDashboard } from "../../hooks/useUserDashboard";
-
-const UpcomingPickups = () => {
-  const { data, isLoading, isError } = useUserDashboard();
-
-  if (isLoading) {
-    return (
-      <div className="bg-white dark:bg-[#25432E] rounded-2xl shadow-md p-6">
-        <h3 className="text-lg font-semibold dark:text-white text-gray-800 mb-4">
-          Upcoming Pickups
-        </h3>
-        <p className="text-gray-600 dark:text-white/80">Loading...</p>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="bg-white dark:bg-[#25432E] rounded-2xl shadow-md p-6">
-        <h3 className="text-lg font-semibold dark:text-white text-gray-800 mb-4">
-          Upcoming Pickups
-        </h3>
-        <p className="text-red-500">Failed to load pickups</p>
-      </div>
-    );
-  }
-
-  const pickups = data?.upcoming_pickups || [];
-
+const UpcomingPickups = ({ pickups }) => {
   return (
     <div className="bg-white dark:bg-[#25432E] rounded-2xl shadow-md p-6">
       <h3 className="text-lg font-semibold dark:text-white text-gray-800 mb-4">
@@ -59,7 +30,6 @@ const UpcomingPickups = () => {
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Date: {new Date(pickup.pickup_date).toLocaleDateString()}
               </p>
-
               <ul className="mt-2 text-sm text-gray-700 dark:text-gray-300 list-disc pl-4">
                 {pickup.items.map((item, i) => (
                   <li key={i}>
