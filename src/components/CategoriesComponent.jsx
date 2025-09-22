@@ -40,7 +40,7 @@ const CategoriesComponent = () => {
   ];
 
   return (
-    <section className="py-24  " id="categories">
+    <section className="py-24" id="categories">
       <div className="w-full text-center px-4">
         {/* Section Header */}
         <h2 className="text-4xl md:text-5xl font-extrabold mb-6">
@@ -54,31 +54,33 @@ const CategoriesComponent = () => {
         {/* Categories  */}
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-3 px-4 md:px-10">
           {categories.map((cat) => (
-            <Link
-              to={`/category/${cat.title
-                .toLowerCase()
-                .replace(" & ", "_")
-                .replace(" ", "_")}`}
+            <div
               key={cat.id}
               className="group bg-white dark:bg-[#1B3124] rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-3 border border-gray-100 overflow-hidden relative"
             >
-              {/* Image */}
-              <div className="bg-gray-50 overflow-hidden">
-                <img
-                  src={cat.icon}
-                  alt={cat.title}
-                  className="w-full h-[26rem] object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </div>
+              {/* Clickable card area (image + text) */}
+              <Link
+                to="/recycling-request"
+                state={{ category: cat.title }}
+                className="block"
+                aria-label={`Open recycling request for ${cat.title}`}
+              >
+                <div className="bg-gray-50 overflow-hidden">
+                  <img
+                    src={cat.icon}
+                    alt={cat.title}
+                    className="w-full h-[26rem] object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                </div>
 
-              {/* Title & Text */}
-              <div className="p-8 text-center relative z-10">
-                <h3 className="text-xl font-bold  mb-3 group-hover:text-ecoGreen transition-colors duration-300">
-                  {cat.title}
-                </h3>
-                <p className=" text-base leading-relaxed">{cat.text}</p>
-              </div>
-            </Link>
+                <div className="p-8 text-center relative z-10">
+                  <h3 className="text-xl font-bold mb-3 group-hover:text-ecoGreen transition-colors duration-300">
+                    {cat.title}
+                  </h3>
+                  <p className="text-base leading-relaxed">{cat.text}</p>
+                </div>
+              </Link>
+            </div>
           ))}
         </div>
       </div>
