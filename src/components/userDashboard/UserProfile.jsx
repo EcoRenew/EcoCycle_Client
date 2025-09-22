@@ -5,7 +5,7 @@ const UserProfile = () => {
   const { user } = useAuth();
 
   return (
-    <div className="bg-white py-16 dark:bg-[#25432E] rounded-2xl shadow-md p-6 mb-6">
+    <div className="bg-white pt-16 dark:bg-[#25432E] p-6 ">
       <div className="flex items-center mb-4">
         <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center text-white text-xl font-bold mr-4">
           {/* ✅ Show initials of user name */}

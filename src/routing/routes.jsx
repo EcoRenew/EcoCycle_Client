@@ -27,6 +27,10 @@ import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
 import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
 import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
+import DashboardLayout from "../components/userDashboard/DashboardLayout";
+import SchedulePage from "../pages/SchedulePage";
+import DonationsPage from "../pages/DonationsPage ";
+import ImpactPage from "../pages/ImpactPage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -37,6 +41,16 @@ const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
+      {
+        path: "profile",
+        element: <DashboardLayout />, // sidebar + user profile always visible
+        children: [
+          { path: "schedule", element: <SchedulePage /> },
+          { path: "donations", element: <DonationsPage /> },
+          { path: "impact", element: <ImpactPage /> },
+          { path: "", element: <UserPage /> },
+        ],
+      },
       {
         path: "login",
         element: (
@@ -61,11 +75,12 @@ const router = createBrowserRouter([
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
       { path: "customer-details", element: <RecyclingRequestPage /> },
-      { path: "profile", element: <UserPage /> },
+
       { path: "payment-success", element: <PaymentSuccess /> },
       { path: "auth/callback", element: <GoogleCallback /> },
     ],
   },
+
   {
     path: "/admin",
     element: <AdminApp />,
