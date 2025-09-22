@@ -32,6 +32,7 @@ import DashboardLayout from "../components/userDashboard/DashboardLayout";
 import SchedulePage from "../pages/SchedulePage";
 import DonationsPage from "../pages/DonationsPage ";
 import ImpactPage from "../pages/ImpactPage";
+import ProtectedRoute from "../components/rotectedRoute";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -44,7 +45,11 @@ const router = createBrowserRouter([
       { path: "contact", element: <ContactPage /> },
       {
         path: "profile",
-        element: <DashboardLayout />, // sidebar + user profile always visible
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
         children: [
           { path: "schedule", element: <SchedulePage /> },
           { path: "donations", element: <DonationsPage /> },
