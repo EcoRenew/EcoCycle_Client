@@ -7,6 +7,83 @@ import NavbarComponent from '../components/NavbarComponent';
 const envBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 const apiBase = envBase.endsWith('/api') ? envBase : `${envBase.replace(/\/$/, '')}/api`;
 
+// Stable subcomponents (defined at module scope to avoid remount/focus loss)
+const AddPhoneInline = ({ newPhoneNumber, setNewPhoneNumber, onSaved }) => {
+  const { user, token } = useAuth();
+  return (
+    <div className="mt-2 flex gap-2">
+      <input
+        type="tel"
+        value={newPhoneNumber}
+        onChange={(e) => setNewPhoneNumber(e.target.value)}
+        className="flex-1 px-3 py-2 border-2 rounded-lg border-gray-300"
+        placeholder="New phone number"
+      />
+      <button
+        type="button"
+        onClick={async () => {
+          if (!newPhoneNumber.trim() || !token) return;
+          try {
+            const res = await fetch(`${apiBase}/phones`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ phone: newPhoneNumber.trim() })
+            });
+            if (res.ok) {
+              const js = await res.json();
+              const raw = js.data;
+              const saved = { id: raw.phone_id || raw.id, number: raw.phone || raw.number, is_primary: !!raw.is_primary };
+              onSaved(saved);
+            }
+          } catch {}
+        }}
+        className="px-4 py-2 bg-green-600 text-white rounded-lg"
+      >Save</button>
+    </div>
+  );
+};
+
+const AddAddressInline = ({ newAddress, setNewAddress, onSaved }) => {
+  const { user, token } = useAuth();
+  return (
+    <div className="mt-2 grid grid-cols-1 md:grid-cols-3 gap-2">
+      <input
+        type="text"
+        value={newAddress.street}
+        onChange={(e) => setNewAddress(prev => ({ ...prev, street: e.target.value }))}
+        className="px-3 py-2 border-2 rounded-lg border-gray-300"
+        placeholder="Street"
+      />
+      <input
+        type="text"
+        value={newAddress.city}
+        onChange={(e) => setNewAddress(prev => ({ ...prev, city: e.target.value }))}
+        className="px-3 py-2 border-2 rounded-lg border-gray-300"
+        placeholder="City"
+      />
+      <button
+        type="button"
+        onClick={async () => {
+          if (!token || !newAddress.street.trim()) return;
+          try {
+            const res = await fetch(`${apiBase}/addresses`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+              body: JSON.stringify({ street: newAddress.street.trim(), city: newAddress.city.trim() })
+            });
+            if (res.ok) {
+              const js = await res.json();
+              const saved = js.data;
+              onSaved(saved);
+            }
+          } catch {}
+        }}
+        className="px-4 py-2 bg-green-600 text-white rounded-lg"
+      >Save</button>
+    </div>
+  );
+};
+
 const RecyclingRequestPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,6 +99,26 @@ const RecyclingRequestPage = () => {
   const [materials, setMaterials] = useState([]);
   const [isLoadingMaterials, setIsLoadingMaterials] = useState(true);
   const [materialsError, setMaterialsError] = useState(null);
+  const LoadingSkeleton = () => (
+    <div className="space-y-4">
+      {[...Array(4)].map((_, idx) => (
+        <div key={idx} className="bg-white rounded-xl shadow-md border-2 border-gray-100 overflow-hidden">
+          <div className="p-6 animate-pulse">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 rounded-full bg-gray-200" />
+                <div>
+                  <div className="h-4 w-40 bg-gray-200 rounded mb-2" />
+                  <div className="h-3 w-24 bg-gray-200 rounded" />
+                </div>
+              </div>
+              <div className="h-6 w-6 bg-gray-200 rounded" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
   
   // Selection state
   const [selectedItems, setSelectedItems] = useState(location.state?.selectedItems || []);
@@ -36,7 +133,7 @@ const RecyclingRequestPage = () => {
     address: '',
     pickupDate: '',
     preferredTime: '',
-    requestType: 'recycle_for_money'
+    requestType: 'Recycling'
   });
   
   // Phone numbers and addresses state
@@ -46,6 +143,9 @@ const RecyclingRequestPage = () => {
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [newPhoneNumber, setNewPhoneNumber] = useState('');
   const [newAddress, setNewAddress] = useState({ street: '', city: '' });
+  const [selectedPhoneNumber, setSelectedPhoneNumber] = useState('');
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,6 +153,7 @@ const RecyclingRequestPage = () => {
   const [submissionError, setSubmissionError] = useState(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
   
   // Educational content
   const educationalVideos = [
@@ -174,6 +275,64 @@ const RecyclingRequestPage = () => {
 
     fetchData();
   }, []);
+
+  // Load profile (full name, email), phone numbers and addresses for customer-details page
+  useEffect(() => {
+    const fetchProfileAndContacts = async () => {
+      if (!token) return;
+      try {
+        setIsLoadingProfile(true);
+        const headers = { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' };
+        const [meRes, phonesRes, addressesRes] = await Promise.all([
+          fetch(`${apiBase}/users/me`, { headers }),
+          fetch(`${apiBase}/phones`, { headers }),
+          fetch(`${apiBase}/addresses`, { headers })
+        ]);
+
+        if (meRes.ok) {
+          const meJson = await meRes.json();
+          const me = meJson.data || meJson;
+          setFormData(prev => ({
+            ...prev,
+            fullName: me.name || me.full_name || prev.fullName || '',
+            email: me.email || prev.email || ''
+          }));
+        } else if (user) {
+          // fallback to context user if API fails
+          setFormData(prev => ({ ...prev, fullName: user.name || prev.fullName || '', email: user.email || prev.email || '' }));
+        }
+
+        if (phonesRes.ok) {
+          const pJson = await phonesRes.json();
+          const list = (pJson.data || []).map(p => ({ id: p.phone_id || p.id, number: p.phone || p.number, is_primary: p.is_primary }));
+          setPhoneNumbers(list);
+          if (list.length > 0) {
+            const primary = list.find(p => p.is_primary) || list[0];
+            setSelectedPhoneNumber(primary.number);
+            setFormData(prev => ({ ...prev, phoneNumber: primary.number }));
+          }
+        }
+
+        if (addressesRes.ok) {
+          const aJson = await addressesRes.json();
+          const list = aJson.data || [];
+          setAddresses(list);
+          if (list.length > 0) {
+            const first = list[0];
+            setSelectedAddressId(first.address_id || first.id);
+            const composed = [first.street, first.city].filter(Boolean).join(', ');
+            setFormData(prev => ({ ...prev, address: composed }));
+          }
+        }
+      } catch (e) {
+        // non-fatal
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    fetchProfileAndContacts();
+  }, [token]);
   
   // Calculate total value
   useEffect(() => {
@@ -288,8 +447,8 @@ const RecyclingRequestPage = () => {
       errors.phoneNumber = 'Please enter a valid phone number';
     }
     
-    if (!formData.address.trim()) {
-      errors.address = 'Address is required';
+    if (!selectedAddressId) {
+      errors.address = 'Please select a saved address';
     }
     
     if (!formData.pickupDate) {
@@ -301,12 +460,12 @@ const RecyclingRequestPage = () => {
       
       if (selectedDate < minDate) {
         errors.pickupDate = 'Pickup must be scheduled at least 48 hours in advance';
+      } else if (selectedDate.getDay() === 5) {
+        errors.pickupDate = 'Pickup cannot be scheduled on Fridays';
       }
     }
     
-    if (!formData.preferredTime) {
-      errors.preferredTime = 'Preferred time is required';
-    }
+    // preferredTime is optional in backend
     
     if (selectedItems.length === 0) {
       errors.materials = 'Please select at least one material';
@@ -333,24 +492,8 @@ const RecyclingRequestPage = () => {
     setSubmissionError(null);
     
     try {
-      // Create address if needed
-      let addressId = null;
-      const addressResponse = await fetch(`${apiBase}/addresses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          street: formData.address,
-          city: ''
-        })
-      });
-      
-      if (addressResponse.ok) {
-        const addressData = await addressResponse.json();
-        addressId = addressData.data?.address_id || addressData.data?.id;
-      }
+      // Use selected address id; backend requires an existing address
+      const addressId = selectedAddressId;
       
       // Prepare materials for submission
       const materials = selectedItems.map(item => ({
@@ -368,14 +511,23 @@ const RecyclingRequestPage = () => {
         notes: `Customer: ${formData.fullName}, Preferred time: ${formData.preferredTime}`
       };
       
+      // Add error handling with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(`${apiBase}/requests`, {
         method: 'POST',
+        mode: 'cors',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(requestPayload)
+        body: JSON.stringify(requestPayload),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (response.status === 201) {
         const result = await response.json();
@@ -389,14 +541,18 @@ const RecyclingRequestPage = () => {
           address: '',
           pickupDate: '',
           preferredTime: '',
-          requestType: 'recycle_for_money'
+          requestType: 'Recycling'
         });
         
         showToastMessage(`Request #${requestId} submitted successfully!`);
         setCurrentPage('material-selection');
       } else {
+        let msg = 'Failed to submit request';
+        try {
         const errorData = await response.json();
-        setSubmissionError(errorData.message || 'Failed to submit request');
+          msg = errorData.message || JSON.stringify(errorData);
+        } catch {}
+        setSubmissionError(`${msg} (status ${response.status})`);
       }
     } catch (error) {
       console.error('Submission error:', error);
@@ -406,8 +562,8 @@ const RecyclingRequestPage = () => {
     }
   };
   
-  // Material Selection Page Component
-  const MaterialSelectionPage = () => (
+  // Material Selection Page (render function to avoid remount/focus loss)
+  const renderMaterialSelectionPage = () => (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50">
       <NavbarComponent />
       
@@ -452,6 +608,11 @@ const RecyclingRequestPage = () => {
             <div className="lg:col-span-2">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">Select Materials</h2>
               
+              {isLoadingMaterials ? (
+                <LoadingSkeleton />
+              ) : materialsError ? (
+                <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded">{materialsError}</div>
+              ) : (
               <div className="space-y-4">
                 {materialCategories.map((category) => {
                   const selectedCount = selectedItems.filter(item => item.categoryId === category.id).length;
@@ -585,6 +746,7 @@ const RecyclingRequestPage = () => {
                   );
                 })}
               </div>
+              )}
             </div>
             
             {/* Request Summary Sidebar */}
@@ -782,8 +944,8 @@ const RecyclingRequestPage = () => {
     </div>
   );
   
-  // Customer Details Page Component
-  const CustomerDetailsPage = () => {
+  // Customer Details Page (render function to avoid remount/focus loss)
+  const renderCustomerDetailsPage = () => {
     return (
       <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 pb-12">
         <NavbarComponent />
@@ -848,40 +1010,19 @@ const RecyclingRequestPage = () => {
                 )}
                 
                 <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name*</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
                       <input
                         type="text"
-                        name="firstName"
-                        value={formData.firstName || ''}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.firstName ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
-                        placeholder="Enter your first name"
-                      />
-                      {validationErrors.firstName && (
-                        <p className="mt-1 text-sm text-red-600 flex items-center">
-                          {validationErrors.firstName}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name*</label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName || ''}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.lastName ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
-                        placeholder="Enter your last name"
-                      />
-                      {validationErrors.lastName && (
-                        <p className="mt-1 text-sm text-red-600 flex items-center">
-                          {validationErrors.lastName}
-                        </p>
-                      )}
-                    </div>
+                      name="fullName"
+                      value={formData.fullName || ''}
+                      readOnly
+                      className={`w-full px-4 py-3 border-2 rounded-lg bg-gray-100 text-gray-700 ${validationErrors.fullName ? 'border-red-300' : 'border-gray-300'}`}
+                      placeholder="Full name"
+                    />
+                    {isLoadingProfile && (
+                      <p className="mt-1 text-sm text-gray-500">Loading profile…</p>
+                    )}
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -894,9 +1035,9 @@ const RecyclingRequestPage = () => {
                         type="email"
                         name="email"
                         value={formData.email || ''}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
-                        placeholder="Enter your email address"
+                        readOnly
+                        className={`w-full px-4 py-3 border-2 rounded-lg bg-gray-100 text-gray-700 ${validationErrors.email ? 'border-red-300' : 'border-gray-300'}`}
+                        placeholder="Email"
                       />
                       {validationErrors.email && (
                         <p className="mt-1 text-sm text-red-600 flex items-center">
@@ -910,14 +1051,34 @@ const RecyclingRequestPage = () => {
                         <span className="mr-2 text-gray-500">📞</span>
                         Phone Number*
                       </label>
-                      <input
-                        type="tel"
-                        name="phoneNumber"
-                        value={formData.phoneNumber || ''}
-                        onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.phoneNumber ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
-                        placeholder="Enter your phone number"
-                      />
+                      <div className="flex gap-2">
+                        <select
+                          value={selectedPhoneNumber}
+                          onChange={(e) => { setSelectedPhoneNumber(e.target.value); setFormData(prev => ({ ...prev, phoneNumber: e.target.value })); }}
+                          className={`flex-1 px-3 py-3 border-2 rounded-lg focus:border-green-500 ${validationErrors.phoneNumber ? 'border-red-300 bg-red-50' : 'border-gray-300'}`}
+                        >
+                          <option value="">{isLoadingProfile ? 'Loading…' : 'Select phone'}</option>
+                          {phoneNumbers.map(p => (
+                            <option key={p.id || p.number} value={p.number}>{p.number}</option>
+                          ))}
+                        </select>
+                        <button type="button" onClick={() => setIsAddingPhone(v => !v)} className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50">{isAddingPhone ? 'Cancel' : 'Add'}</button>
+                      </div>
+                      {isAddingPhone ? (
+                        <AddPhoneInline
+                          newPhoneNumber={newPhoneNumber}
+                          setNewPhoneNumber={setNewPhoneNumber}
+                          onSaved={(saved) => {
+                            const filtered = saved.is_primary ? phoneNumbers.map(p => ({ ...p, is_primary: false })) : phoneNumbers;
+                            const updated = [...filtered.filter(p => p.number !== saved.number), saved];
+                            setPhoneNumbers(updated);
+                            setSelectedPhoneNumber(saved.number);
+                            setFormData(prev => ({ ...prev, phoneNumber: saved.number }));
+                            setNewPhoneNumber('');
+                            setIsAddingPhone(false);
+                          }}
+                        />
+                      ) : null}
                       {validationErrors.phoneNumber && (
                         <p className="mt-1 text-sm text-red-600 flex items-center">
                           {validationErrors.phoneNumber}
@@ -934,74 +1095,50 @@ const RecyclingRequestPage = () => {
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Street Address*</label>
-                        <input
-                          type="text"
-                          name="streetAddress"
-                          value={formData.streetAddress || ''}
-                          onChange={handleInputChange}
-                          className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.streetAddress ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}`}
-                          placeholder="Enter your street address"
-                        />
-                        {validationErrors.streetAddress && (
-                          <p className="mt-1 text-sm text-red-600 flex items-center">
-                            {validationErrors.streetAddress}
-                          </p>
-                        )}
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Saved Addresses</label>
+                        <div className="flex gap-2">
+                          <select
+                            value={selectedAddressId || ''}
+                            onChange={(e) => {
+                              const id = e.target.value ? Number(e.target.value) : null;
+                              setSelectedAddressId(id);
+                              const a = addresses.find(x => (x.address_id || x.id) === id);
+                              const composed = a ? [a.street, a.city].filter(Boolean).join(', ') : '';
+                              setFormData(prev => ({ ...prev, address: composed }));
+                            }}
+                            className="flex-1 px-3 py-3 border-2 rounded-lg border-gray-300"
+                          >
+                            <option value="">{isLoadingProfile ? 'Loading…' : 'Select address'}</option>
+                            {addresses.map(a => (
+                              <option key={a.address_id || a.id} value={a.address_id || a.id}>
+                                {[a.street, a.city].filter(Boolean).join(', ')}
+                              </option>
+                            ))}
+                          </select>
+                          <button type="button" onClick={() => setIsAddingAddress(v => !v)} className="px-4 py-2 border-2 border-gray-300 rounded-lg hover:bg-gray-50">{isAddingAddress ? 'Cancel' : 'Add'}</button>
                       </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">City*</label>
-                          <input
-                            type="text"
-                            name="city"
-                            value={formData.city || ''}
-                            onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.city ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}`}
-                            placeholder="Enter your city"
+                        {isAddingAddress ? (
+                          <AddAddressInline
+                            newAddress={newAddress}
+                            setNewAddress={setNewAddress}
+                            onSaved={(saved) => {
+                              const id = saved.address_id || saved.id;
+                              const updated = [...addresses, saved];
+                              setAddresses(updated);
+                              setSelectedAddressId(id);
+                              const composed = [saved.street, saved.city].filter(Boolean).join(', ');
+                              setFormData(prev => ({ ...prev, address: composed }));
+                              setIsAddingAddress(false);
+                              setNewAddress({ street: '', city: '' });
+                            }}
                           />
-                          {validationErrors.city && (
-                            <p className="mt-1 text-sm text-red-600 flex items-center">
-                              {validationErrors.city}
-                            </p>
+                        ) : null}
+                        {validationErrors.address && (
+                          <p className="mt-1 text-sm text-red-600 flex items-center">{validationErrors.address}</p>
                           )}
                         </div>
                         
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">State*</label>
-                          <input
-                            type="text"
-                            name="state"
-                            value={formData.state || ''}
-                            onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.state ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}`}
-                            placeholder="Enter your state"
-                          />
-                          {validationErrors.state && (
-                            <p className="mt-1 text-sm text-red-600 flex items-center">
-                              {validationErrors.state}
-                            </p>
-                          )}
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code*</label>
-                          <input
-                            type="text"
-                            name="zipCode"
-                            value={formData.zipCode || ''}
-                            onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all ${validationErrors.zipCode ? 'border-red-300 bg-red-50' : 'border-gray-300 bg-white'}`}
-                            placeholder="Enter your ZIP code"
-                          />
-                          {validationErrors.zipCode && (
-                            <p className="mt-1 text-sm text-red-600 flex items-center">
-                              {validationErrors.zipCode}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+                      {/* City/State/ZIP removed in favor of saved address selection */}
                     </div>
                   </div>
                   
@@ -1099,8 +1236,8 @@ const RecyclingRequestPage = () => {
                         <input
                           type="radio"
                           name="requestType"
-                          value="recycle_for_money"
-                          checked={formData.requestType === 'recycle_for_money'}
+                          value="Recycling"
+                          checked={formData.requestType === 'Recycling'}
                           onChange={handleInputChange}
                           className="mr-3 text-green-600 focus:ring-green-500 h-5 w-5"
                         />
@@ -1113,8 +1250,8 @@ const RecyclingRequestPage = () => {
                         <input
                           type="radio"
                           name="requestType"
-                          value="donate"
-                          checked={formData.requestType === 'donate'}
+                          value="Donation"
+                          checked={formData.requestType === 'Donation'}
                           onChange={handleInputChange}
                           className="mr-3 text-green-600 focus:ring-green-500 h-5 w-5"
                         />
@@ -1266,7 +1403,7 @@ const RecyclingRequestPage = () => {
   
   return (
     <>
-      {currentPage === 'material-selection' ? <MaterialSelectionPage /> : <CustomerDetailsPage />}
+      {currentPage === 'material-selection' ? renderMaterialSelectionPage() : renderCustomerDetailsPage()}
       
       {/* Toast Notification */}
       {showToast && (
