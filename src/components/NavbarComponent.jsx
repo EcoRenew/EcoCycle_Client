@@ -13,6 +13,7 @@ import CartButton from "./CartButton";
 import MobileMenu from "./MobileMenu";
 import NavLinks from "./NavLinks";
 import { useAuth } from "../context/AuthContext";
+import { useCartContext } from "../context/CartContext"; // use provider context
 
 const NavbarComponent = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,12 +21,12 @@ const NavbarComponent = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  // ✅ useCartContext only once
+  const cart = useCartContext();
+
   const handleUserClick = () => {
-    if (!user) {
-      navigate("/register");
-    } else {
-      navigate("/profile");
-    }
+    if (!user) navigate("/register");
+    else navigate("/profile");
   };
 
   return (
@@ -53,8 +54,15 @@ const NavbarComponent = () => {
           </button>
 
           {/* Cart */}
-          <CartButton onClick={() => setCartOpen(true)} />
-          <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+          <CartButton
+            cartItems={cart.cartItems}
+            onClick={() => setCartOpen(true)}
+          />
+          <CartSidebar
+            isOpen={cartOpen}
+            onClose={() => setCartOpen(false)}
+            cart={cart}
+          />
 
           {/* Dark Mode Toggle */}
           <ColorModeSwitch />

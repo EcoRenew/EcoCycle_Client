@@ -1,18 +1,15 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTimes } from "@fortawesome/free-solid-svg-icons";
-import { useCart } from "../hooks/useCart";
 import { createStripeCheckoutSession } from "../services/stripeService";
 import { useAuth } from "../context/AuthContext";
 
-const CartSidebar = ({ isOpen, onClose }) => {
+const CartSidebar = ({ isOpen, onClose, cart }) => {
   const { cartItems, addToCart, removeFromCart, updateCartItem, isLoading } =
-    useCart();
-
+    cart;
   const { token, user } = useAuth();
 
   if (!isOpen) return null;
 
-  // ✅ Checkout handler
   const handleCheckout = async () => {
     if (!user) {
       alert("Please login first!");
@@ -40,7 +37,6 @@ const CartSidebar = ({ isOpen, onClose }) => {
     }
   };
 
-  // ✅ Handle + and - buttons
   const handleAdd = (product) => {
     if (!product?.id) return;
     addToCart.mutate({ product, quantity: 1 });
@@ -61,9 +57,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
 
   const total = cartItems.reduce((sum, item) => {
     const product = item.product || item;
-    const price = product?.price || 0;
-    const quantity = item.quantity || 0;
-    return sum + price * quantity;
+    return sum + (product?.price || 0) * (item.quantity || 0);
   }, 0);
 
   return (

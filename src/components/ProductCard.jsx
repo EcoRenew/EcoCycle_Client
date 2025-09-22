@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { useCart } from "../hooks/useCart";
-import { useAuth } from "../context/AuthContext"; // ✅ import auth
+import { useCartContext } from "../context/CartContext"; // ✅ use provider context
+import { useAuth } from "../context/AuthContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShoppingCart, faBell } from "@fortawesome/free-solid-svg-icons";
 
 const ProductCard = ({ product }) => {
-  const { addToCart } = useCart();
-  const { user } = useAuth(); // ✅ check if logged in
-  const [message, setMessage] = useState(""); // ✅ store message
+  const { addToCart } = useCartContext(); // ✅ only once
+  const { user } = useAuth();
+  const [message, setMessage] = useState("");
 
   if (!product) return null;
 
@@ -15,11 +15,11 @@ const ProductCard = ({ product }) => {
 
   const handleAddToCart = () => {
     if (!user) {
-      setMessage("Please login to add items to your cart."); // ✅ show message
+      setMessage("Please login to add items to your cart.");
       return;
     }
     addToCart.mutate({ product, quantity: 1 });
-    setMessage(""); // ✅ clear message if successful
+    setMessage("");
   };
 
   return (
@@ -75,7 +75,7 @@ const ProductCard = ({ product }) => {
           {product.description || "High-quality eco-friendly product."}
         </p>
 
-        {/* ✅ Show login message */}
+        {/* Show login message */}
         {message && (
           <p className="mt-3 text-sm text-red-500 font-medium">{message}</p>
         )}
