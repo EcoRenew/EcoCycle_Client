@@ -8,4 +8,5 @@ export const MENU_LINKS = [
   { name: "Partners", path: "/partners" },
   { name: "DIY", path: "/diy" },
   { name: "Community", path: "/community" },
+  { name: "Donation", path: "/donate" },
 ];

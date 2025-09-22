@@ -23,6 +23,7 @@ import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
+import DonationPage from "../pages/DonationPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
 import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
@@ -74,6 +75,7 @@ const router = createBrowserRouter([
       { path: "diy", element: <DIYPage /> },
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
+      { path: "donate", element: <DonationPage /> },
       { path: "customer-details", element: <RecyclingRequestPage /> },
 
       { path: "payment-success", element: <PaymentSuccess /> },
