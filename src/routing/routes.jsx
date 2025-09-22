@@ -25,7 +25,10 @@ import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
 import DonationPage from "../pages/DonationPage";
-
+import GuestRoute from "../components/GuestRoute/GuestRoute";
+import UserPage from "../pages/UserPage";
+import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
+import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -36,8 +39,22 @@ const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
-      { path: "login", element: <Login /> },
-      { path: "register", element: <Register /> },
+      {
+        path: "login",
+        element: (
+          <GuestRoute>
+            <Login />
+          </GuestRoute>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <GuestRoute>
+            <Register />
+          </GuestRoute>
+        ),
+      },
       { path: "faq", element: <FAQPage /> },
       { path: "category/:type", element: <CategoryPage /> },
       { path: "events", element: <EventsPage /> },
@@ -46,6 +63,10 @@ const router = createBrowserRouter([
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
       { path: "donate", element: <DonationPage /> },
+      { path: "customer-details", element: <RecyclingRequestPage /> },
+      { path: "profile", element: <UserPage /> },
+      { path: "payment-success", element: <PaymentSuccess /> },
+      { path: "auth/callback", element: <GoogleCallback /> },
     ],
   },
   {
@@ -67,6 +88,18 @@ const router = createBrowserRouter([
           { index: true, element: <AdminDashboard /> },
           { path: "users", element: <UserManagement /> },
           { path: "content", element: <ContentManagement /> },
+          {
+            path: "content/articles",
+            element: <ContentManagement type="articles" />,
+          },
+          {
+            path: "categories",
+            element: <ContentManagement type="categories" />,
+          },
+          {
+            path: "materials",
+            element: <ContentManagement type="materials" />,
+          },
           { path: "donations", element: <DonationRequests /> },
           { path: "partnerships", element: <Partnerships /> },
           { path: "settings", element: <Settings /> },

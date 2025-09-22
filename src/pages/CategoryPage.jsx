@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import { categoryContent } from "../data/categoryContent";
 import RecycleSection from "../components/RecycleCategories/RecycleSection";
 import Banner from "../components/RecycleCategories/Banner";
-import CategoryCard from "../components/CategoryCard/CategoryCard";
+import CategoryCard from "../assets/CategoryCard/CategoryCard";
 
 const CategoryPage = () => {
   const { type } = useParams();
@@ -69,4 +69,3 @@ const CategoryPage = () => {
 };
 
 export default CategoryPage;
-

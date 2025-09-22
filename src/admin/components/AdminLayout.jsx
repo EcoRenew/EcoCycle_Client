@@ -22,11 +22,17 @@ const AdminLayout = () => {
   // Main navigation items
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-    { name: 'Categories', href: '/admin/categories', icon: DocumentTextIcon },
-    { name: 'Content Management', href: '/admin/content', icon: DocumentTextIcon },
-    { name: 'Donation Requests', href: '/admin/donations', icon: HandRaisedIcon },
+    { name: 'Requests', href: '/admin/donations', icon: HandRaisedIcon },
     { name: 'Partnerships', href: '/admin/partnerships', icon: BuildingOfficeIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
+  ];
+  
+  // Content management categories
+  const contentCategories = [
+    { name: 'All Content', href: '/admin/content', icon: DocumentTextIcon },
+    { name: 'Articles', href: '/admin/content/articles', icon: DocumentTextIcon },
+    { name: 'Categories', href: '/admin/categories', icon: DocumentTextIcon },
+    { name: 'Materials', href: '/admin/materials', icon: DocumentTextIcon },
   ];
   
   // User management categories
@@ -38,8 +44,9 @@ const AdminLayout = () => {
     { name: 'Admins', href: '/admin/users/admins', icon: UsersIcon },
   ];
   
-  // Toggle state for user management section
+  // Toggle states for collapsible sections
   const [userManagementOpen, setUserManagementOpen] = useState(true);
+  const [contentManagementOpen, setContentManagementOpen] = useState(true);
 
   const handleLogout = () => {
     logout();
@@ -96,6 +103,39 @@ const AdminLayout = () => {
                   {userManagementOpen ? '▼' : '►'}
                 </span>
               </button>
+              {/* Content Management Section */}
+              <button 
+                onClick={() => setContentManagementOpen(!contentManagementOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Content Management</span>
+                <span className="transform transition-transform duration-200">
+                  {contentManagementOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {contentManagementOpen && (
+                <div className="mt-2 space-y-1">
+                  {contentCategories.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <item.icon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+              
               {userManagementOpen && (
                 <div className="mt-2 space-y-1">
                   {userCategories.map((item) => {
@@ -171,6 +211,40 @@ const AdminLayout = () => {
                   </Link>
                 );
               })}
+            </div>
+            
+            {/* Content Management Section */}
+            <div>
+              <button 
+                onClick={() => setContentManagementOpen(!contentManagementOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Content Management</span>
+                <span className="transform transition-transform duration-200">
+                  {contentManagementOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {contentManagementOpen && (
+                <div className="mt-2 space-y-1">
+                  {contentCategories.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                      >
+                        <item.icon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             
             {/* User Management Section */}

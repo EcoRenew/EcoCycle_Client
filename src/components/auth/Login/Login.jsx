@@ -15,18 +15,26 @@ import Divider from "../../common/Divider/Divider";
 export default function Login() {
   const { login } = useAuth();
   let navigate = useNavigate();
-
   async function handleLogin(values, { setStatus }) {
     try {
       const res = await login(values.email, values.password);
+
       if (res.success) {
         setStatus({ type: "success", message: res.message });
         navigate("/");
       } else {
-        setStatus({ type: "error", message: res.message });
+        if (res.email_not_verified) {
+          setStatus({
+            type: "error",
+            message: res.message,
+          });
+        } else {
+          setStatus({ type: "error", message: res.message });
+        }
       }
     } catch (error) {
       console.log(error);
+      setStatus({ type: "error", message: "Something went wrong" });
     }
   }
 
@@ -54,7 +62,6 @@ export default function Login() {
     validate: validateForm,
     onSubmit: handleLogin,
   });
-
   return (
     <div className="flex min-h-screen">
       <div className="flex flex-1 flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
@@ -157,12 +164,12 @@ export default function Login() {
               <GoogleButton />
               <AuthSwitchLink>
                 <span className="dark:text-white/60">New to EcoCycle?</span>
-                {/* <Link
-                  to=""
+                <Link
+                  to="/register"
                   className="font-medium text-primary-600 hover:text-primary-500"
                 >
                   Register now
-                </Link> */}
+                </Link>
               </AuthSwitchLink>
             </div>
           </div>
