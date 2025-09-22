@@ -7,8 +7,16 @@ const DonationForm = ({
   handleFileUpload,
   handleFileChange,
   handleSubmit,
-  fadeIn
+  previewUrls,
+  handleRemoveImage,
+  fadeIn,
+  errors
 }) => {
+  const inputStyle = (hasError) =>
+    `w-full px-4 py-3 border rounded-lg outline-none transition-all ${
+      hasError ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-green-500'
+    }`;
+
   return (
     <div className={`bg-white rounded-lg shadow-lg p-8 transition-all duration-1000 delay-500 ease-out ${fadeIn ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
       {/* العنوان */}
@@ -33,8 +41,9 @@ const DonationForm = ({
               value={formData.fullName}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+              className={inputStyle(errors.fullName)}
             />
+            {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -47,8 +56,9 @@ const DonationForm = ({
               value={formData.email}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+              className={inputStyle(errors.email)}
             />
+            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
         </div>
 
@@ -57,15 +67,16 @@ const DonationForm = ({
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <Phone className="inline w-4 h-4 mr-1" />
-              Phone Number
+              Phone Number *
             </label>
             <input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+              className={inputStyle(errors.phone)}
             />
+            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -77,8 +88,9 @@ const DonationForm = ({
               name="pickupDate"
               value={formData.pickupDate}
               onChange={handleInputChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+              className={inputStyle(errors.pickupDate)}
             />
+            {errors.pickupDate && <p className="text-red-500 text-sm mt-1">{errors.pickupDate}</p>}
           </div>
         </div>
 
@@ -94,9 +106,10 @@ const DonationForm = ({
             onChange={handleInputChange}
             required
             rows="3"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"
+            className={inputStyle(errors.address) + ' resize-none'}
             placeholder="Please provide your complete address for pickup"
           ></textarea>
+          {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
         </div>
 
         {/* التصنيفات والحالة */}
@@ -108,7 +121,7 @@ const DonationForm = ({
               value={formData.itemCategory}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+              className={inputStyle(errors.itemCategory)}
             >
               <option value="">Select a category</option>
               <option value="clothing">Clothing & Accessories</option>
@@ -119,6 +132,7 @@ const DonationForm = ({
               <option value="household">Household Items</option>
               <option value="other">Other</option>
             </select>
+            {errors.itemCategory && <p className="text-red-500 text-sm mt-1">{errors.itemCategory}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Item Condition *</label>
@@ -127,7 +141,7 @@ const DonationForm = ({
               value={formData.condition}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+              className={inputStyle(errors.condition)}
             >
               <option value="">Select condition</option>
               <option value="excellent">Excellent</option>
@@ -135,6 +149,7 @@ const DonationForm = ({
               <option value="fair">Fair</option>
               <option value="needs-repair">Needs Minor Repair</option>
             </select>
+            {errors.condition && <p className="text-red-500 text-sm mt-1">{errors.condition}</p>}
           </div>
         </div>
 
@@ -147,9 +162,10 @@ const DonationForm = ({
             onChange={handleInputChange}
             required
             rows="4"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all resize-none"
-            placeholder="Please describe the items you'd like to donate (quantity, size, specific details, etc.)"
+            className={inputStyle(errors.description) + ' resize-none'}
+            placeholder="Please describe the items you'd like to donate"
           ></textarea>
+          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
         </div>
 
         <div>
@@ -190,10 +206,33 @@ const DonationForm = ({
               onChange={handleFileChange}
               className="hidden"
             />
+         {errors.photos && <p className="text-red-500 text-sm mt-2">{errors.photos}</p>}
+
+            {previewUrls.length > 0 && (
+              <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                {previewUrls.map((url, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={url}
+                      alt={`Preview ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg border border-gray-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
+                      title="Remove"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-                {/* زر الإرسال */}
+        {/* زر الإرسال */}
         <button
           type="button"
           onClick={handleSubmit}

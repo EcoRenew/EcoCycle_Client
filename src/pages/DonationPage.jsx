@@ -19,6 +19,10 @@ const DonationPage = () => {
     additionalNotes: ''
   });
 
+  const [errors, setErrors] = useState({});
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+
   const partners = [
     { id: 1, name: "Children's Hope Foundation", image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1000&q=80" },
     { id: 2, name: "Community Care Center", image: "https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=1000&q=80" },
@@ -31,14 +35,153 @@ const DonationPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+//   const handleInputChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData(prev => ({ ...prev, [name]: value }));
+//   };
+
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  setFormData((prev) => ({ ...prev, [name]: value }));
+
+  // Live validation
+  setErrors((prevErrors) => {
+    const updatedErrors = { ...prevErrors };
+
+    // Full Name
+    if (name === "fullName") {
+      if (!value.trim()) updatedErrors.fullName = "Full name is required";
+      else delete updatedErrors.fullName;
+    }
+
+    // Email
+    if (name === "email") {
+      if (!value.trim()) updatedErrors.email = "Email is required";
+      else if (!/\S+@\S+\.\S+/.test(value)) updatedErrors.email = "Email is invalid";
+      else delete updatedErrors.email;
+    }
+
+    // Phone
+    if (name === "phone") {
+      if (!value.trim()) updatedErrors.phone = "Phone number is required";
+      else if (!/^(\+?\d{11,13})$/.test(value)) updatedErrors.phone = "Phone number must be at least 11 digits";
+      else delete updatedErrors.phone;
+    }
+
+    // Address
+    if (name === "address") {
+      if (!value.trim()) updatedErrors.address = "Address is required";
+      else delete updatedErrors.address;
+    }
+
+    // Item Category
+    if (name === "itemCategory") {
+      if (!value) updatedErrors.itemCategory = "Please select a category";
+      else delete updatedErrors.itemCategory;
+    }
+
+    // Condition
+    if (name === "condition") {
+      if (!value) updatedErrors.condition = "Please select item condition";
+      else delete updatedErrors.condition;
+    }
+
+    // Description
+    if (name === "description") {
+      if (!value.trim()) updatedErrors.description = "Description is required";
+      else delete updatedErrors.description;
+    }
+
+    // Pickup Date
+    if (name === "pickupDate") {
+      const selectedDate = new Date(value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (selectedDate < today) {
+        updatedErrors.pickupDate = "Pickup date cannot be in the past";
+      } else if (selectedDate.getDay() === 5) {
+        updatedErrors.pickupDate = "Pickup is not available on Fridays";
+      } else {
+        delete updatedErrors.pickupDate;
+      }
+    }
+
+    return updatedErrors;
+  });
+};
+
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
+    if (!formData.email.trim()) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid";
+
+    if (!formData.phone.trim()) {
+    newErrors.phone = "Phone number is required";
+    } else if (!/^(\+?\d{11,13})$/.test(formData.phone)) {
+    newErrors.phone = "Phone number must be at least 11 digits";
+    }
+
+    if (!formData.address.trim()) newErrors.address = "Address is required";
+    if (!formData.itemCategory) newErrors.itemCategory = "Please select a category";
+    if (!formData.condition) newErrors.condition = "Please select item condition";
+    if (!formData.description.trim()) newErrors.description = "Description is required";
+
+    if (!formData.pickupDate) {
+    newErrors.pickupDate = "Pickup date is required";
+    } else {
+    const selectedDate = new Date(formData.pickupDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (selectedDate < today) {
+        newErrors.pickupDate = "Pickup date cannot be in the past";
+    } else if (selectedDate.getDay() === 5) {
+        newErrors.pickupDate = "Pickup is not available on Fridays";
+    }
+    }
+
+    if (uploadedFiles.length === 0) {
+      newErrors.photos = "Please upload at least one photo";
+    }
+
+    return newErrors;
   };
 
-  const handleSubmit = () => {
-    console.log('Donation form submitted:', formData);
-    alert('Thank you for your donation! We will contact you soon.');
+  const handleSubmit = async () => {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      alert("Please fix the errors before submitting.");
+      return;
+    }
+
+    setErrors({});
+
+    const formDataToSend = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      formDataToSend.append(key, value);
+    });
+    uploadedFiles.forEach((file, index) => {
+      formDataToSend.append(`photos[${index}]`, file);
+    });
+
+    try {
+      const response = await fetch("http://localhost:8000/api/donations", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      const result = await response.json();
+      alert(result.message || "Thank you for your donation!");
+    } catch (error) {
+      console.error("Error submitting donation:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   const handleFileUpload = () => {
@@ -46,11 +189,32 @@ const DonationPage = () => {
   };
 
   const handleFileChange = (e) => {
-    const files = e.target.files;
-    if (files.length > 0) {
-      console.log('Selected files:', files);
-      alert(`${files.length} photo(s) selected successfully!`);
+    const files = Array.from(e.target.files);
+    const validImages = files.filter(file =>
+      file.type.startsWith("image/") &&
+      ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(file.type)
+    );
+
+    if (validImages.length === 0) {
+      alert("Please select valid image files (JPEG, PNG, etc.)");
+      return;
     }
+
+    if (validImages.length > 5) {
+      alert("You can upload up to 5 images only.");
+      return;
+    }
+
+    setUploadedFiles(validImages);
+    setPreviewUrls(validImages.map(file => URL.createObjectURL(file)));
+  };
+
+  const handleRemoveImage = (indexToRemove) => {
+    const updatedFiles = uploadedFiles.filter((_, i) => i !== indexToRemove);
+    const updatedPreviews = previewUrls.filter((_, i) => i !== indexToRemove);
+
+    setUploadedFiles(updatedFiles);
+    setPreviewUrls(updatedPreviews);
   };
 
   return (
@@ -64,11 +228,13 @@ const DonationPage = () => {
           handleFileUpload={handleFileUpload}
           handleFileChange={handleFileChange}
           handleSubmit={handleSubmit}
+          previewUrls={previewUrls}
+          handleRemoveImage={handleRemoveImage}
+          errors={errors}
           fadeIn={fadeIn}
         />
 
         <DonationNextSteps />
-
         <CharityPartners partners={partners} fadeIn={fadeIn} />
       </div>
     </div>
