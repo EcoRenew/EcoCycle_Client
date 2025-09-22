@@ -5,18 +5,29 @@ import {
   faYoutube,
 } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import footerBg from "../assets/footer3.jpg";
 
 const FooterComponent = () => {
   return (
-    <footer className=" bg-[#1B3124] dark:bg-bg text-white pt-16 pb-10 px-6 md:px-12 ">
-      <div className="max-w-7xl mx-auto">
+    <footer
+      className="relative text-white pt-16 pb-10 px-6 md:px-12"
+      style={{
+        backgroundImage: `url(${footerBg})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
+    >
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/70"></div>
+
+      <div className="relative max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+          {/* Logo & Description */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <FontAwesomeIcon
                 icon={faRecycle}
-                className="text-[#38af44] animate-spin-slow"
-                size="2x"
+                className="text-[#38af44] animate-spin-slow !w-9 !h-9 stroke-[40]"
               />
               <h2 className="text-white text-2xl font-extrabold">EcoCycle</h2>
             </div>

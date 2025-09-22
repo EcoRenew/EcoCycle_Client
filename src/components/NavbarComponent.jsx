@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faTimes, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBars,
+  faTimes,
+  faUser,
+  faRecycle,
+} from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import ColorModeSwitch from "./ColorModeSwitch";
 import CartSidebar from "./CartSidebar";
@@ -29,8 +34,12 @@ const NavbarComponent = () => {
     <nav className="bg-white dark:bg-bg dark:text-white shadow-md fixed w-full top-0 left-0 z-50">
       <div className="px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <span className="text-3xl animate-spin-slow">♻️</span>
+        <Link to="/" className="flex items-center gap-2">
+          <FontAwesomeIcon
+            icon={faRecycle}
+            className="text-[#38af44] animate-spin-slow !w-9 !h-9 stroke-[40]"
+          />
+
           <span className="text-2xl font-bold">EcoCycle</span>
         </Link>
 
@@ -58,8 +67,11 @@ const NavbarComponent = () => {
             )}
           </div>
 
+          {/* Cart */}
           <CartButton onClick={() => setCartOpen(true)} />
           <CartSidebar isOpen={cartOpen} onClose={() => setCartOpen(false)} />
+
+          {/* Dark Mode Toggle */}
           <ColorModeSwitch />
 
           {/* Mobile Menu Button */}
