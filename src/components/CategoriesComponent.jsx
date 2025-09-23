@@ -2,6 +2,7 @@ import Plastic from "../assets/plastic.png";
 import Metal from "../assets/metal.png";
 import Electronics from "../assets/electronics.png";
 import Oil from "../assets/oil.png";
+import Fabric from "../assets/fabric1.jpg";
 import paperCartoon from "../assets/carton.png";
 import { Link } from "react-router-dom";
 
@@ -36,6 +37,12 @@ const CategoriesComponent = () => {
       icon: Oil,
       title: "Cooking Oil",
       text: "Dispose of used cooking oil responsibly so it can be recycled safely.",
+    },
+    {
+      id: 6,
+      icon: Fabric,
+      title: "Fabrics & Textiles",
+      text: "Donate old clothes, linens, and textiles for recycling or reuse.",
     },
   ];
 

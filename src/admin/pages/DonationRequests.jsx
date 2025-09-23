@@ -12,6 +12,8 @@ import {
   ArrowDownIcon,
   FunnelIcon,
 } from '@heroicons/react/24/outline';
+import { requestApi } from '../../services/adminApi';
+import { Link } from 'react-router-dom';
 
 const DonationRequests = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,146 +35,52 @@ const DonationRequests = () => {
     pickup_address: '',
     preferred_date: '',
     notes: '',
-    status: 'pending'
+    status: 'Pending',
+    request_type: 'Donation'
   });
   const [sortField, setSortField] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
   const [filterStatus, setFilterStatus] = useState('all');
-  const [filterType, setFilterType] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch requests - using mock data since API endpoint is not implemented yet
+  // Fetch donation requests from API
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      // Mock data since the API endpoint is not implemented yet
-      const mockData = [
-        {
-          id: 1,
-          requester_name: 'John Doe',
-          email: 'john@example.com',
-          phone: '123-456-7890',
-          material_type: 'Paper',
-          quantity: '5 kg',
-          pickup_address: '123 Main St, City',
-          preferred_date: '2024-08-15',
-          notes: 'Please pick up in the morning',
-          status: 'pending',
-          request_type: 'recycling',
-          created_at: '2024-07-01'
-        },
-        {
-          id: 2,
-          requester_name: 'Jane Smith',
-          email: 'jane@example.com',
-          phone: '987-654-3210',
-          material_type: 'Electronics',
-          quantity: '2 items',
-          pickup_address: '456 Oak Ave, Town',
-          preferred_date: '2024-08-20',
-          notes: 'Old laptop and monitor',
-          status: 'approved',
-          request_type: 'donation',
-          created_at: '2024-07-05'
-        },
-        {
-          id: 3,
-          requester_name: 'Robert Johnson',
-          email: 'robert@example.com',
-          phone: '555-123-4567',
-          material_type: 'Plastic',
-          quantity: '3 kg',
-          pickup_address: '789 Pine St, Village',
-          preferred_date: '2024-08-25',
-          notes: '',
-          status: 'completed',
-          request_type: 'recycling',
-          created_at: '2024-07-10'
-        },
-        {
-          id: 4,
-          requester_name: 'Emily Davis',
-          email: 'emily@example.com',
-          phone: '444-555-6666',
-          material_type: 'Furniture',
-          quantity: '1 sofa',
-          pickup_address: '101 Elm St, County',
-          preferred_date: '2024-08-30',
-          notes: 'In good condition',
-          status: 'rejected',
-          request_type: 'donation',
-          created_at: '2024-07-15'
-        }
-      ];
-      
-      // Simulate API delay
-      setTimeout(() => {
-        setRequests(mockData);
-        setError(null);
-        setLoading(false);
-      }, 500);
-      
+      setError(null);
+      const params = {
+        page: currentPage,
+        per_page: 10,
+        type: 'Donation', // Filter for donation requests only
+        status: filterStatus !== 'all' ? filterStatus : undefined,
+        search: searchTerm || undefined,
+        sort_by: sortField,
+        sort_dir: sortDirection,
+      };
+      const response = await requestApi.getRequests(params);
+      const paged = response.data.data; // Laravel paginator
+      setRequests(paged.data || []);
+      setTotalPages(paged.last_page || 1);
     } catch (err) {
-      console.error('Error fetching requests:', err);
-      setError('Failed to load requests. Please try again later.');
+      setError(err.response?.data?.message || 'Failed to fetch donation requests');
+      console.error('Donation requests fetch error:', err);
+    } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [currentPage, filterStatus, searchTerm, sortField, sortDirection]);
 
-  // Filter and sort requests
-  const getFilteredAndSortedRequests = () => {
-    return requests
-      .filter(request => {
-        // Apply status filter
-        if (filterStatus !== 'all' && request.status !== filterStatus) {
-          return false;
-        }
-        
-        // Apply type filter
-        if (filterType !== 'all' && request.request_type !== filterType) {
-          return false;
-        }
-        
-        // Apply search filter
-        if (searchTerm) {
-          const searchLower = searchTerm.toLowerCase();
-          return (
-            (request.requester_name && request.requester_name.toLowerCase().includes(searchLower)) ||
-            (request.material_type && request.material_type.toLowerCase().includes(searchLower)) ||
-            (request.status && request.status.toLowerCase().includes(searchLower)) ||
-            (request.email && request.email.toLowerCase().includes(searchLower)) ||
-            (request.pickup_address && request.pickup_address.toLowerCase().includes(searchLower))
-          );
-        }
-        
-        return true;
-      })
-      .sort((a, b) => {
-        // Handle sorting
-        const fieldA = a[sortField] || '';
-        const fieldB = b[sortField] || '';
-        
-        if (typeof fieldA === 'string' && typeof fieldB === 'string') {
-          return sortDirection === 'asc' 
-            ? fieldA.localeCompare(fieldB) 
-            : fieldB.localeCompare(fieldA);
-        } else {
-          return sortDirection === 'asc' 
-            ? fieldA - fieldB 
-            : fieldB - fieldA;
-        }
-      });
-  };
-
-  const filteredRequests = getFilteredAndSortedRequests();
+  // Since we're fetching filtered data from API, we can use requests directly
+  const filteredRequests = requests;
 
   // Handle view details
   const handleViewDetails = (request) => {
-    setSelectedRequest(request);
-    setIsDetailsModalOpen(true);
+    // Kept for other flows, not used by button anymore
+    window.location.href = `/admin/requests/${request.request_id || request.id}`;
   };
 
   // Handle edit request
@@ -193,55 +101,58 @@ const DonationRequests = () => {
     setIsCreateModalOpen(true);
   };
 
-  // Handle status change - using mock implementation
-  const handleStatusChange = async (id, newStatus) => {
+  // Handle status change
+  const handleStatusChange = async (request, newStatus) => {
     try {
-      // Simulate API delay
-      setTimeout(() => {
-        // Update local state
-        setRequests(requests.map(req => 
-          req.id === id ? { ...req, status: newStatus } : req
-        ));
-        
-        // If we're in the details modal, update the selected request
-        if (selectedRequest && selectedRequest.id === id) {
-          setSelectedRequest({ ...selectedRequest, status: newStatus });
+      const id = request.request_id || request.id;
+      let collectorId;
+      if (newStatus === 'Assigned') {
+        const entered = window.prompt('Enter Collector ID to assign to this request:');
+        if (!entered) {
+          return; // cancelled
         }
-      }, 300);
+        collectorId = Number(entered);
+        if (!collectorId || Number.isNaN(collectorId)) {
+          alert('Invalid collector ID');
+          return;
+        }
+      }
+      await requestApi.updateRequestStatus(id, newStatus, collectorId);
+      fetchRequests();
     } catch (err) {
-      console.error('Error updating status:', err);
-      alert('Failed to update status. Please try again.');
+      console.error('Update status error:', err);
+      alert(err.response?.data?.message || 'Failed to update request status');
     }
   };
 
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'pending':
+      case 'Pending':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
             <ClockIcon className="mr-1 h-4 w-4" />
             Pending
           </span>
         );
-      case 'approved':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-            <CheckCircleIcon className="mr-1 h-4 w-4" />
-            Approved
-          </span>
-        );
-      case 'rejected':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            <XCircleIcon className="mr-1 h-4 w-4" />
-            Rejected
-          </span>
-        );
-      case 'completed':
+      case 'Assigned':
         return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             <CheckCircleIcon className="mr-1 h-4 w-4" />
+            Assigned
+          </span>
+        );
+      case 'Completed':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <CheckCircleIcon className="mr-1 h-4 w-4" />
             Completed
+          </span>
+        );
+      case 'Canceled':
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <XCircleIcon className="mr-1 h-4 w-4" />
+            Canceled
           </span>
         );
       default:
@@ -275,29 +186,13 @@ const DonationRequests = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/requests/${selectedRequest.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(editFormData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update request');
-      }
-      
-      // Update local state
-      setRequests(requests.map(req => 
-        req.id === selectedRequest.id ? editFormData : req
-      ));
-      
+      const id = selectedRequest.request_id || selectedRequest.id;
+      await requestApi.updateRequest(id, editFormData);
       setIsEditModalOpen(false);
-      
+      fetchRequests();
     } catch (err) {
       console.error('Error updating request:', err);
-      alert('Failed to update request. Please try again.');
+      alert(err.response?.data?.message || 'Failed to update request. Please try again.');
     }
   };
 
@@ -305,23 +200,7 @@ const DonationRequests = () => {
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/api/admin/requests', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(createFormData),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to create request');
-      }
-      
-      const result = await response.json();
-      
-      // Add new request to local state
-      setRequests([...requests, result.data]);
+      await requestApi.createRequest(createFormData);
       
       // Reset form and close modal
       setCreateFormData({
@@ -333,35 +212,28 @@ const DonationRequests = () => {
         pickup_address: '',
         preferred_date: '',
         notes: '',
-        status: 'pending'
+        status: 'Pending',
+        request_type: 'Donation'
       });
       setIsCreateModalOpen(false);
+      fetchRequests();
       
     } catch (err) {
       console.error('Error creating request:', err);
-      alert('Failed to create request. Please try again.');
+      alert(err.response?.data?.message || 'Failed to create request. Please try again.');
     }
   };
 
   // Handle delete confirmation
   const handleDeleteConfirm = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/admin/requests/${selectedRequest.id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete request');
-      }
-      
-      // Update local state
-      setRequests(requests.filter(req => req.id !== selectedRequest.id));
+      const id = selectedRequest.request_id || selectedRequest.id;
+      await requestApi.deleteRequest(id);
       setIsDeleteModalOpen(false);
-      
+      fetchRequests();
     } catch (err) {
       console.error('Error deleting request:', err);
-      alert('Failed to delete request. Please try again.');
+      alert(err.response?.data?.message || 'Failed to delete request. Please try again.');
     }
   };
 
@@ -379,9 +251,9 @@ const DonationRequests = () => {
     <div className="px-4 sm:px-6 lg:px-8 py-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Requests</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Donation Requests</h1>
           <p className="mt-2 text-sm text-gray-700">
-            Manage donation and recycling requests from users.
+            Manage donation requests from users.
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
@@ -397,7 +269,7 @@ const DonationRequests = () => {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* Search */}
         <div className="relative rounded-md shadow-sm">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -406,7 +278,7 @@ const DonationRequests = () => {
           <input
             type="text"
             className="focus:ring-indigo-500 focus:border-indigo-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
-            placeholder="Search requests..."
+            placeholder="Search donation requests..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -424,27 +296,10 @@ const DonationRequests = () => {
             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
           >
             <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="approved">Approved</option>
-            <option value="rejected">Rejected</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-        
-        {/* Type Filter */}
-        <div>
-          <label htmlFor="type-filter" className="block text-sm font-medium text-gray-700 mb-1">
-            Request Type
-          </label>
-          <select
-            id="type-filter"
-            value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
-            <option value="all">All Types</option>
-            <option value="donation">Donation</option>
-            <option value="recycling">Recycling</option>
+            <option value="Pending">Pending</option>
+            <option value="Assigned">Assigned</option>
+            <option value="Completed">Completed</option>
+            <option value="Canceled">Canceled</option>
           </select>
         </div>
       </div>
@@ -482,11 +337,11 @@ const DonationRequests = () => {
                       <th
                         scope="col"
                         className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer"
-                        onClick={() => handleSortChange('requester_name')}
+                        onClick={() => handleSortChange('request_id')}
                       >
                         <div className="flex items-center">
-                          Requester
-                          {sortField === 'requester_name' && (
+                          Request ID
+                          {sortField === 'request_id' && (
                             <span className="ml-2">
                               {sortDirection === 'asc' ? (
                                 <ArrowUpIcon className="h-4 w-4" />
@@ -500,11 +355,11 @@ const DonationRequests = () => {
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
-                        onClick={() => handleSortChange('material_type')}
+                        onClick={() => handleSortChange('customer')}
                       >
                         <div className="flex items-center">
-                          Material Type
-                          {sortField === 'material_type' && (
+                          Customer
+                          {sortField === 'customer' && (
                             <span className="ml-2">
                               {sortDirection === 'asc' ? (
                                 <ArrowUpIcon className="h-4 w-4" />
@@ -518,11 +373,11 @@ const DonationRequests = () => {
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
-                        onClick={() => handleSortChange('preferred_date')}
+                        onClick={() => handleSortChange('pickup_date')}
                       >
                         <div className="flex items-center">
-                          Preferred Date
-                          {sortField === 'preferred_date' && (
+                          Pickup Date
+                          {sortField === 'pickup_date' && (
                             <span className="ml-2">
                               {sortDirection === 'asc' ? (
                                 <ArrowUpIcon className="h-4 w-4" />
@@ -554,11 +409,11 @@ const DonationRequests = () => {
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
-                        onClick={() => handleSortChange('request_type')}
+                        onClick={() => handleSortChange('created_at')}
                       >
                         <div className="flex items-center">
-                          Type
-                          {sortField === 'request_type' && (
+                          Created
+                          {sortField === 'created_at' && (
                             <span className="ml-2">
                               {sortDirection === 'asc' ? (
                                 <ArrowUpIcon className="h-4 w-4" />
@@ -578,37 +433,36 @@ const DonationRequests = () => {
                     {filteredRequests.length === 0 ? (
                       <tr>
                         <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
-                          No requests found
+                          No donation requests found
                         </td>
                       </tr>
                     ) : (
                       filteredRequests.map((request) => (
-                        <tr key={request.id}>
+                        <tr key={request.request_id || request.id}>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                            {request.requester_name}
+                            #{request.request_id || request.id}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {request.material_type}
+                            {request.customer?.name || 'N/A'}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {request.preferred_date}
+                            {request.pickup_date ? new Date(request.pickup_date).toLocaleDateString() : 'N/A'}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {getStatusBadge(request.status)}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {request.request_type || 'N/A'}
+                            {request.created_at ? new Date(request.created_at).toLocaleDateString() : 'N/A'}
                           </td>
                           <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                             <div className="flex justify-end space-x-2">
-                              <button
-                                type="button"
+                              <Link
+                                to={`/admin/requests/${request.request_id || request.id}`}
                                 className="inline-flex items-center text-indigo-600 hover:text-indigo-900"
-                                onClick={() => handleViewDetails(request)}
                               >
                                 <EyeIcon className="h-5 w-5" />
                                 <span className="sr-only">View</span>
-                              </button>
+                              </Link>
                               <button
                                 type="button"
                                 className="inline-flex items-center text-blue-600 hover:text-blue-900"
@@ -638,6 +492,31 @@ const DonationRequests = () => {
         </div>
       )}
 
+      {/* Pagination */}
+      {!loading && !error && requests.length > 0 && (
+        <div className="mt-4 flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing page {currentPage} of {totalPages}
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage === 1}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1 text-sm border border-gray-300 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Details Modal */}
       {isDetailsModalOpen && selectedRequest && (
         <div className="fixed z-10 inset-0 overflow-y-auto">
@@ -650,48 +529,62 @@ const DonationRequests = () => {
                   <h3 className="text-lg leading-6 font-medium text-gray-900">Request Details</h3>
                   <div className="mt-4 space-y-4">
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500">Requester Information</h4>
-                      <p className="mt-1 text-sm text-gray-900">{selectedRequest.requester_name}</p>
-                      <p className="mt-1 text-sm text-gray-900">{selectedRequest.email}</p>
-                      <p className="mt-1 text-sm text-gray-900">{selectedRequest.phone}</p>
+                      <h4 className="text-sm font-medium text-gray-500">Request Information</h4>
+                      <p className="mt-1 text-sm text-gray-900">ID: #{selectedRequest.request_id || selectedRequest.id}</p>
+                      <p className="mt-1 text-sm text-gray-900">Type: {selectedRequest.request_type || 'Donation'}</p>
+                      <p className="mt-1 text-sm text-gray-900">Created: {selectedRequest.created_at ? new Date(selectedRequest.created_at).toLocaleDateString() : 'N/A'}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500">Material Information</h4>
-                      <p className="mt-1 text-sm text-gray-900">Type: {selectedRequest.material_type}</p>
-                      <p className="mt-1 text-sm text-gray-900">Quantity: {selectedRequest.quantity}</p>
+                      <h4 className="text-sm font-medium text-gray-500">Customer Information</h4>
+                      <p className="mt-1 text-sm text-gray-900">Name: {selectedRequest.customer?.name || 'N/A'}</p>
+                      <p className="mt-1 text-sm text-gray-900">Email: {selectedRequest.customer?.email || 'N/A'}</p>
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">Pickup Information</h4>
-                      <p className="mt-1 text-sm text-gray-900">Address: {selectedRequest.pickup_address}</p>
-                      <p className="mt-1 text-sm text-gray-900">Preferred Date: {selectedRequest.preferred_date}</p>
+                      <p className="mt-1 text-sm text-gray-900">Date: {selectedRequest.pickup_date ? new Date(selectedRequest.pickup_date).toLocaleDateString() : 'N/A'}</p>
+                      <p className="mt-1 text-sm text-gray-900">Address: {selectedRequest.pickupAddress?.street || 'N/A'}</p>
+                      <p className="mt-1 text-sm text-gray-900">City: {selectedRequest.pickupAddress?.city || 'N/A'}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm font-medium text-gray-500">Request Type</h4>
-                      <p className="mt-1 text-sm text-gray-900">{selectedRequest.request_type || 'N/A'}</p>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-gray-500">Notes</h4>
-                      <p className="mt-1 text-sm text-gray-900">{selectedRequest.notes || 'No notes provided'}</p>
+                      <h4 className="text-sm font-medium text-gray-500">Materials</h4>
+                      {selectedRequest.requestItems && selectedRequest.requestItems.length > 0 ? (
+                        <div className="mt-1">
+                          {selectedRequest.requestItems.map((item, index) => (
+                            <p key={index} className="text-sm text-gray-900">
+                              {item.material?.material_name}: {item.quantity} {item.material?.default_unit || 'units'}
+                            </p>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="mt-1 text-sm text-gray-900">No materials specified</p>
+                      )}
                     </div>
                     <div>
                       <h4 className="text-sm font-medium text-gray-500">Status</h4>
                       <div className="mt-1">{getStatusBadge(selectedRequest.status)}</div>
                     </div>
-                    {selectedRequest.status === 'pending' && (
+                    {selectedRequest.status === 'Pending' && (
                       <div className="mt-4 flex space-x-3">
                         <button
                           type="button"
-                          className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                          onClick={() => handleStatusChange(selectedRequest.id, 'approved')}
+                          className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          onClick={() => handleStatusChange(selectedRequest, 'Assigned')}
                         >
-                          Approve
+                          Assign
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                          onClick={() => handleStatusChange(selectedRequest, 'Completed')}
+                        >
+                          Complete
                         </button>
                         <button
                           type="button"
                           className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          onClick={() => handleStatusChange(selectedRequest.id, 'rejected')}
+                          onClick={() => handleStatusChange(selectedRequest, 'Canceled')}
                         >
-                          Reject
+                          Cancel
                         </button>
                       </div>
                     )}
@@ -839,10 +732,10 @@ const DonationRequests = () => {
                           onChange={handleEditFormChange}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option value="pending">Pending</option>
-                          <option value="approved">Approved</option>
-                          <option value="rejected">Rejected</option>
-                          <option value="completed">Completed</option>
+                          <option value="Pending">Pending</option>
+                          <option value="Assigned">Assigned</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Canceled">Canceled</option>
                         </select>
                       </div>
                     </div>
@@ -971,13 +864,12 @@ const DonationRequests = () => {
                           name="request_type"
                           id="request_type"
                           required
-                          value={createFormData.request_type || ''}
+                          value={createFormData.request_type || 'Donation'}
                           onChange={handleCreateFormChange}
                           className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option value="">Select a type</option>
-                          <option value="donation">Donation</option>
-                          <option value="recycling">Recycling</option>
+                          <option value="Donation">Donation</option>
+                          <option value="Recycling">Recycling</option>
                         </select>
                       </div>
                       <div>

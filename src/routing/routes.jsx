@@ -17,6 +17,11 @@ import ContentManagement from "../admin/pages/ContentManagement";
 import DonationRequests from "../admin/pages/DonationRequests";
 import Partnerships from "../admin/pages/Partnerships";
 import Settings from "../admin/pages/Settings";
+import Invoices from "../admin/pages/Invoices";
+import InvoiceDetails from "../admin/pages/InvoiceDetails";
+import FaqManagement from "../admin/pages/FaqManagement";
+import EventManagement from "../admin/pages/EventManagement";
+import EventRegistrations from "../admin/pages/EventRegistrations";
 import AdminRouteGuard from "../admin/components/AdminRouteGuard";
 import DIYPage from "../pages/DIYPage";
 import CommunityPage from "../pages/CommunityPage";
@@ -27,7 +32,14 @@ import DonationPage from "../pages/DonationPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
 import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
+import RequestManagement from "../admin/pages/RequestManagement";
+import RequestDetails from "../admin/pages/RequestDetails";
 import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
+import DashboardLayout from "../components/userDashboard/DashboardLayout";
+import SchedulePage from "../pages/SchedulePage";
+import DonationsPage from "../pages/DonationsPage ";
+import ImpactPage from "../pages/ImpactPage";
+import ProtectedRoute from "../components/rotectedRoute";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -38,6 +50,20 @@ const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: "schedule", element: <SchedulePage /> },
+          { path: "donations", element: <DonationsPage /> },
+          { path: "impact", element: <ImpactPage /> },
+          { path: "", element: <UserPage /> },
+        ],
+      },
       {
         path: "login",
         element: (
@@ -63,11 +89,13 @@ const router = createBrowserRouter([
       { path: "recycling-request", element: <RecyclingRequestPage /> },
       { path: "donate", element: <DonationPage /> },
       { path: "customer-details", element: <RecyclingRequestPage /> },
-      { path: "profile", element: <UserPage /> },
+
       { path: "payment-success", element: <PaymentSuccess /> },
       { path: "auth/callback", element: <GoogleCallback /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
+
   {
     path: "/admin",
     element: <AdminApp />,
@@ -86,6 +114,8 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <AdminDashboard /> },
           { path: "users", element: <UserManagement /> },
+          { path: "requests", element: <RequestManagement /> },
+          { path: "requests/:id", element: <RequestDetails /> },
           { path: "content", element: <ContentManagement /> },
           {
             path: "content/articles",
@@ -102,6 +132,11 @@ const router = createBrowserRouter([
           { path: "donations", element: <DonationRequests /> },
           { path: "partnerships", element: <Partnerships /> },
           { path: "settings", element: <Settings /> },
+          { path: "invoices", element: <Invoices /> },
+          { path: "invoices/:id", element: <InvoiceDetails /> },
+          { path: "faqs", element: <FaqManagement /> },
+          { path: "events", element: <EventManagement /> },
+          { path: "event-registrations", element: <EventRegistrations /> },
         ],
       },
     ],

@@ -1,28 +1,41 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { publicContentApi } from "../services/adminApi";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronUp } from "@fortawesome/free-solid-svg-icons";
 
 const FAQPage = () => {
-  const [openItems, setOpenItems] = useState({
-    recycling: {
-      "what-materials": false,
-      "how-prepare": false,
-    },
-    donations: {
-      "what-items": false,
-      "schedule-pickup": false,
-    },
-    account: {},
-  });
+  const [openItems, setOpenItems] = useState({});
+  const [faqs, setFaqs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadFaqs = async () => {
+      try {
+        setLoading(true);
+        const { data } = await publicContentApi.getFaqs();
+        const list = data.data || data;
+        setFaqs(list);
+      } catch (e) {
+        setError("Failed to load FAQs");
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadFaqs();
+  }, []);
 
   const toggleItem = (section, item) => {
-    setOpenItems((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [item]: !prev[section][item],
-      },
-    }));
+    setOpenItems((prev) => {
+      const sectionState = prev[section] || {};
+      return {
+        ...prev,
+        [section]: {
+          ...sectionState,
+          [item]: !sectionState[item],
+        },
+      };
+    });
   };
 
   return (
@@ -50,59 +63,39 @@ const FAQPage = () => {
         </div>
 
         <div className="md:w-2/3">
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-              Recycling
-            </h2>
+          {loading && <div className="mb-12">Loading FAQs...</div>}
+          {error && <div className="mb-12 text-red-600">{error}</div>}
+          {!loading && !error && (
+            <section className="mb-12">
+              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                FAQs
+              </h2>
+              {faqs.map((faq) => (
+                <div key={faq.faq_id} className="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                  <button
+                    className="w-full flex justify-between items-center p-5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => toggleItem('faqs', faq.faq_id)}
+                  >
+                    <span className="text-lg font-medium text-gray-900 dark:text-white">
+                      {faq.question}
+                    </span>
+                    <FontAwesomeIcon
+                      icon={openItems.faqs?.[faq.faq_id] ? faChevronUp : faChevronDown}
+                      className="text-ecoGreen"
+                    />
+                  </button>
 
-            <div className="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-              <button
-                className="w-full flex justify-between items-center p-5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                onClick={() => toggleItem("recycling", "what-materials")}
-              >
-                <span className="text-lg font-medium text-gray-900 dark:text-white">
-                  What materials can I recycle?
-                </span>
-                <FontAwesomeIcon
-                  icon={openItems.recycling["what-materials"] ? faChevronUp : faChevronDown}
-                  className="text-ecoGreen"
-                />
-              </button>
-
-              {openItems.recycling["what-materials"] && (
-                <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    We accept a wide range of materials including paper, cardboard,
-                    plastic bottles and jugs, glass bottles and jars, and metal cans. For a
-                    detailed list, please visit our 'What to Recycle' page.
-                  </p>
+                  {openItems.faqs?.[faq.faq_id] && (
+                    <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+                      <p className="text-gray-600 dark:text-gray-300">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-
-            <div className="mb-4 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-              <button
-                className="w-full flex justify-between items-center p-5 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                onClick={() => toggleItem("recycling", "how-prepare")}
-              >
-                <span className="text-lg font-medium text-gray-900 dark:text-white">
-                  How do I prepare my items?
-                </span>
-                <FontAwesomeIcon
-                  icon={openItems.recycling["how-prepare"] ? faChevronUp : faChevronDown}
-                  className="text-ecoGreen"
-                />
-              </button>
-
-              {openItems.recycling["how-prepare"] && (
-                <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                  <p className="text-gray-600 dark:text-gray-300">
-                    For most recyclables, you should rinse them clean of food residue and remove any non-recyclable components. Flatten cardboard boxes, and make sure all containers are empty and dry. Remove caps from bottles unless specified otherwise by your local recycling guidelines.
-                  </p>
-                </div>
-              )}
-            </div>
-          </section>
+              ))}
+            </section>
+          )}
 
           <section className="mb-12">
             <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
@@ -118,12 +111,12 @@ const FAQPage = () => {
                   What items can I donate?
                 </span>
                 <FontAwesomeIcon
-                  icon={openItems.donations["what-items"] ? faChevronUp : faChevronDown}
+                  icon={openItems.donations?.["what-items"] ? faChevronUp : faChevronDown}
                   className="text-ecoGreen"
                 />
               </button>
 
-              {openItems.donations["what-items"] && (
+              {openItems.donations?.["what-items"] && (
                 <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                   <p className="text-gray-600 dark:text-gray-300">
                     We accept gently used clothing, household items, electronics, furniture, and more. All items should be in good working condition. We cannot accept items that are broken, heavily soiled, or missing essential parts.
@@ -141,12 +134,12 @@ const FAQPage = () => {
                   How do I schedule a donation pickup?
                 </span>
                 <FontAwesomeIcon
-                  icon={openItems.donations["schedule-pickup"] ? faChevronUp : faChevronDown}
+                  icon={openItems.donations?.["schedule-pickup"] ? faChevronUp : faChevronDown}
                   className="text-ecoGreen"
                 />
               </button>
 
-              {openItems.donations["schedule-pickup"] && (
+              {openItems.donations?.["schedule-pickup"] && (
                 <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                   <p className="text-gray-600 dark:text-gray-300">
                     You can schedule a donation pickup through our website or mobile app. Simply create an account, list the items you wish to donate, and select a convenient pickup date and time. Our team will arrive at your location during the scheduled time to collect your donations.
@@ -170,12 +163,12 @@ const FAQPage = () => {
                   How do I create an account?
                 </span>
                 <FontAwesomeIcon
-                  icon={openItems.account["create-account"] ? faChevronUp : faChevronDown}
+                  icon={openItems.account?.["create-account"] ? faChevronUp : faChevronDown}
                   className="text-ecoGreen"
                 />
               </button>
 
-              {openItems.account["create-account"] && (
+              {openItems.account?.["create-account"] && (
                 <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                   <p className="text-gray-600 dark:text-gray-300">
                     Creating an account is easy! Click on the "Sign Up" button in the top right corner of our website. Fill out the registration form with your name, email address, and create a password. Once you submit the form, you'll receive a verification email. Click the link in the email to verify your account, and you're all set!
@@ -193,12 +186,12 @@ const FAQPage = () => {
                   How do I track my recycling points?
                 </span>
                 <FontAwesomeIcon
-                  icon={openItems.account["track-points"] ? faChevronUp : faChevronDown}
+                  icon={openItems.account?.["track-points"] ? faChevronUp : faChevronDown}
                   className="text-ecoGreen"
                 />
               </button>
 
-              {openItems.account["track-points"] && (
+              {openItems.account?.["track-points"] && (
                 <div className="p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                   <p className="text-gray-600 dark:text-gray-300">
                     You can track your recycling points by logging into your account and visiting the "My Points" section on your dashboard. This page displays your current point balance, point history, and available rewards. Points are automatically added to your account when you recycle items at our centers or through our pickup service.
