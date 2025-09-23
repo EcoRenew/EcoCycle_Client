@@ -28,6 +28,7 @@ import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
+import GuestRoute from "../components/GuestRoute/GuestRoute";
 import DonationPage from "../pages/DonationPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
@@ -40,7 +41,7 @@ import DashboardLayout from "../components/userDashboard/DashboardLayout";
 import SchedulePage from "../pages/SchedulePage";
 import DonationsPage from "../pages/DonationsPage ";
 import ImpactPage from "../pages/ImpactPage";
-import ProtectedRoute from "../components/rotectedRoute";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 const router = createBrowserRouter([
   {
     path: "/",
