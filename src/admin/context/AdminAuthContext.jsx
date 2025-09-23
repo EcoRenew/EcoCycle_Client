@@ -23,6 +23,7 @@ export function AdminAuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      
       const response = await fetch(`${baseUrl}/admin/login`, {
         method: 'POST',
         headers: {
@@ -41,6 +42,7 @@ export function AdminAuthProvider({ children }) {
         setAdminUser(user);
         localStorage.setItem('adminToken', token);
         localStorage.setItem('adminUser', JSON.stringify(user));
+        localStorage.setItem('adminLastVerification', Date.now().toString());
         
         return { success: true, message: 'Login successful' };
       } else {
@@ -57,6 +59,7 @@ export function AdminAuthProvider({ children }) {
     setAdminUser(null);
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('adminLastVerification');
   };
 
   const isAuthenticated = () => {

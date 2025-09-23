@@ -64,14 +64,21 @@ export const requestApi = {
     return apiClient.get(`/admin/requests/${requestId}`);
   },
   
-  // Update request status
-  updateRequestStatus: (requestId, status) => {
-    return apiClient.patch(`/admin/requests/${requestId}/status`, { status });
+  // Create a new request
+  createRequest: (requestData) => {
+    return apiClient.post('/admin/requests', requestData);
   },
   
-  // Assign collector to request
-  assignCollector: (requestId, collectorId) => {
-    return apiClient.patch(`/admin/requests/${requestId}/assign`, { collector_id: collectorId });
+  // Update request status (optionally include collector_id when assigning)
+  updateRequestStatus: (requestId, status, collectorId) => {
+    const payload = { status };
+    if (collectorId) payload.collector_id = collectorId;
+    return apiClient.post(`/admin/requests/${requestId}/status`, payload);
+  },
+  
+  // Update request details
+  updateRequest: (requestId, data) => {
+    return apiClient.put(`/admin/requests/${requestId}`, data);
   },
   
   // Delete a request
@@ -106,6 +113,28 @@ export const productApi = {
   deleteProduct: (productId) => {
     return apiClient.delete(`/admin/products/${productId}`);
   }
+};
+
+// Invoice Management API
+export const invoiceApi = {
+  // Get invoices with pagination and optional search
+  getInvoices: (params) => {
+    return apiClient.get('/admin/invoices', { params });
+  },
+  // Get a single invoice by ID
+  getInvoice: (invoiceId) => {
+    return apiClient.get(`/admin/invoices/${invoiceId}`);
+  },
+};
+
+// Email Logs API
+export const requestEmailApi = {
+  getEmails: (requestId) => {
+    return apiClient.get(`/admin/requests/${requestId}/emails`);
+  },
+  resendEmail: (requestId, emailType) => {
+    return apiClient.post(`/admin/requests/${requestId}/emails/resend`, { email_type: emailType });
+  },
 };
 
 // Material Management API
@@ -166,6 +195,32 @@ export const dashboardApi = {
   getRecentActivities: () => {
     return apiClient.get('/admin/dashboard/activities');
   }
+};
+
+// Public content services
+export const publicContentApi = {
+  getFaqs: () => apiClient.get('/faqs'),
+  getEvents: () => apiClient.get('/events'),
+  registerEvent: (payload) => apiClient.post('/events/register', payload),
+};
+
+// Admin CMS services
+export const cmsApi = {
+  // FAQs
+  listFaqs: () => apiClient.get('/admin/faqs'),
+  createFaq: (payload) => apiClient.post('/admin/faqs', payload),
+  updateFaq: (id, payload) => apiClient.put(`/admin/faqs/${id}`, payload),
+  deleteFaq: (id) => apiClient.delete(`/admin/faqs/${id}`),
+
+  // Events
+  listEvents: () => apiClient.get('/admin/events'),
+  createEvent: (payload) => apiClient.post('/admin/events', payload),
+  updateEvent: (id, payload) => apiClient.put(`/admin/events/${id}`, payload),
+  deleteEvent: (id) => apiClient.delete(`/admin/events/${id}`),
+
+  // Event Registrations
+  listRegistrations: () => apiClient.get('/admin/event-registrations'),
+  updateRegistrationStatus: (id, status) => apiClient.post(`/admin/event-registrations/${id}/status`, { status }),
 };
 
 export default {
