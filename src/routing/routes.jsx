@@ -6,7 +6,6 @@ import StorePage from "../pages/StorePage";
 import Register from "../components/auth/Register/Register";
 import Login from "../components/auth/Login/Login";
 import FAQPage from "../pages/FAQPage";
-import CategoryPage from "../pages/CategoryPage";
 import EventsPage from "../pages/EventsPage";
 import PartnersPage from "../pages/PartnersPage";
 import AdminApp from "../admin/AdminApp";
@@ -18,6 +17,11 @@ import ContentManagement from "../admin/pages/ContentManagement";
 import DonationRequests from "../admin/pages/DonationRequests";
 import Partnerships from "../admin/pages/Partnerships";
 import Settings from "../admin/pages/Settings";
+import Invoices from "../admin/pages/Invoices";
+import InvoiceDetails from "../admin/pages/InvoiceDetails";
+import FaqManagement from "../admin/pages/FaqManagement";
+import EventManagement from "../admin/pages/EventManagement";
+import EventRegistrations from "../admin/pages/EventRegistrations";
 import AdminRouteGuard from "../admin/components/AdminRouteGuard";
 import DIYPage from "../pages/DIYPage";
 import CommunityPage from "../pages/CommunityPage";
@@ -25,7 +29,19 @@ import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
-
+import DonationPage from "../pages/DonationPage";
+import GuestRoute from "../components/GuestRoute/GuestRoute";
+import UserPage from "../pages/UserPage";
+import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
+import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
+import RequestManagement from "../admin/pages/RequestManagement";
+import RequestDetails from "../admin/pages/RequestDetails";
+import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
+import DashboardLayout from "../components/userDashboard/DashboardLayout";
+import SchedulePage from "../pages/SchedulePage";
+import DonationsPage from "../pages/DonationsPage ";
+import ImpactPage from "../pages/ImpactPage";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -36,6 +52,20 @@ const router = createBrowserRouter([
       { path: "store", element: <StorePage /> },
       { path: "about", element: <AboutPage /> },
       { path: "contact", element: <ContactPage /> },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <DashboardLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          { path: "schedule", element: <SchedulePage /> },
+          { path: "donations", element: <DonationsPage /> },
+          { path: "impact", element: <ImpactPage /> },
+          { path: "", element: <UserPage /> },
+        ],
+      },
       {
         path: "login",
         element: (
@@ -53,14 +83,22 @@ const router = createBrowserRouter([
         ),
       },
       { path: "faq", element: <FAQPage /> },
-      { path: "category/:type", element: <CategoryPage /> },
+      // { path: "category/:type", element: <CategoryPage /> },
       { path: "events", element: <EventsPage /> },
       { path: "partners", element: <PartnersPage /> },
       { path: "diy", element: <DIYPage /> },
       { path: "community", element: <CommunityPage /> },
       { path: "recycling-request", element: <RecyclingRequestPage /> },
+      { path: "donate", element: <DonationPage /> },
+      { path: "customer-details", element: <RecyclingRequestPage /> },
+
+      { path: "payment-success", element: <PaymentSuccess /> },
+      { path: "auth/callback", element: <GoogleCallback /> },
+
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
+
   {
     path: "/admin",
     element: <AdminApp />,
@@ -79,13 +117,29 @@ const router = createBrowserRouter([
         children: [
           { index: true, element: <AdminDashboard /> },
           { path: "users", element: <UserManagement /> },
+          { path: "requests", element: <RequestManagement /> },
+          { path: "requests/:id", element: <RequestDetails /> },
           { path: "content", element: <ContentManagement /> },
-          { path: "content/articles", element: <ContentManagement type="articles" /> },
-          { path: "categories", element: <ContentManagement type="categories" /> },
-          { path: "materials", element: <ContentManagement type="materials" /> },
+          {
+            path: "content/articles",
+            element: <ContentManagement type="articles" />,
+          },
+          {
+            path: "categories",
+            element: <ContentManagement type="categories" />,
+          },
+          {
+            path: "materials",
+            element: <ContentManagement type="materials" />,
+          },
           { path: "donations", element: <DonationRequests /> },
           { path: "partnerships", element: <Partnerships /> },
           { path: "settings", element: <Settings /> },
+          { path: "invoices", element: <Invoices /> },
+          { path: "invoices/:id", element: <InvoiceDetails /> },
+          { path: "faqs", element: <FaqManagement /> },
+          { path: "events", element: <EventManagement /> },
+          { path: "event-registrations", element: <EventRegistrations /> },
         ],
       },
     ],

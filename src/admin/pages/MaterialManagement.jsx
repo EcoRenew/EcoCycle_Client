@@ -9,7 +9,7 @@ const MaterialModal = ({ isOpen, onClose, material, onSave }) => {
     name: '',
     description: '',
     type: 'plastic',
-    points_per_kg: '',
+    points: '',
     image_url: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,7 +20,7 @@ const MaterialModal = ({ isOpen, onClose, material, onSave }) => {
         name: material.name || '',
         description: material.description || '',
         type: material.type || 'plastic',
-        points_per_kg: material.points_per_kg ? material.points_per_kg.toString() : '',
+        points: material.points ? material.points.toString() : '',
         image_url: material.image_url || ''
       });
     } else {
@@ -28,7 +28,7 @@ const MaterialModal = ({ isOpen, onClose, material, onSave }) => {
         name: '',
         description: '',
         type: 'plastic',
-        points_per_kg: '',
+        points: '',
         image_url: ''
       });
     }
@@ -46,7 +46,7 @@ const MaterialModal = ({ isOpen, onClose, material, onSave }) => {
     try {
       const materialData = {
         ...formData,
-        points_per_kg: parseFloat(formData.points_per_kg)
+        points: parseFloat(formData.points)
       };
       
       await onSave(materialData);
@@ -135,12 +135,12 @@ const MaterialModal = ({ isOpen, onClose, material, onSave }) => {
                       </select>
                     </div>
                     <div>
-                      <label htmlFor="points_per_kg" className="block text-sm font-medium text-gray-700">Points per KG</label>
+                      <label htmlFor="points" className="block text-sm font-medium text-gray-700">Points per KG</label>
                       <input
                         type="number"
-                        name="points_per_kg"
-                        id="points_per_kg"
-                        value={formData.points_per_kg}
+                        name="points"
+                        id="points"
+                        value={formData.points}
                         onChange={handleChange}
                         className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-ecoGreen focus:border-ecoGreen sm:text-sm"
                         required
@@ -400,7 +400,7 @@ const MaterialManagement = () => {
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {material.points_per_kg}
+                          {material.points}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {new Date(material.created_at).toLocaleDateString()}

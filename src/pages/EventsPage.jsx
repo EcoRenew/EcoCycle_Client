@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarAlt, faMapMarkerAlt, faClock, faUser, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { publicContentApi } from '../services/adminApi';
 
 const EventsPage = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
@@ -11,57 +12,24 @@ const EventsPage = () => {
     eventId: '',
   });
 
-  const upcomingEvents = [
-    {
-      id: 1,
-      title: 'Community Cleanup Day',
-      date: 'July 15, 2023',
-      time: '9:00 AM - 1:00 PM',
-      location: 'Central Park, New York',
-      image: 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      description: "Join us for a community cleanup event at Central Park. We'll provide all necessary equipment. Help us make our community cleaner and greener!"
-      ,
-    },
-    {
-      id: 2,
-      title: 'Sustainable Living Workshop',
-      date: 'August 5, 2023',
-      time: '2:00 PM - 4:00 PM',
-      location: 'EcoCycle Headquarters, Boston',
-      image: 'https://images.unsplash.com/photo-1556155092-490a1ba16284?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      description: 'Learn practical tips and tricks for reducing your environmental footprint. This workshop covers composting, reducing waste, and sustainable shopping practices.',
-    },
-    {
-      id: 3,
-      title: 'E-Waste Collection Drive',
-      date: 'August 20, 2023',
-      time: '10:00 AM - 3:00 PM',
-      location: 'City Hall Plaza, Chicago',
-      image: 'https://images.unsplash.com/photo-1605600659873-d808a13e4d2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      description: 'Bring your old electronics for responsible recycling. We accept computers, phones, TVs, and more. Help keep electronic waste out of landfills!',
-    },
-  ];
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const pastEvents = [
-    {
-      id: 4,
-      title: 'Earth Day Celebration',
-      date: 'April 22, 2023',
-      time: '11:00 AM - 4:00 PM',
-      location: 'Riverside Park, Seattle',
-      image: 'https://images.unsplash.com/photo-1569680099601-aa41a8353f2c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      description: 'A day of environmental education, tree planting, and community building. Thanks to everyone who participated in making this event a success!',
-    },
-    {
-      id: 5,
-      title: 'Recycling Awareness Campaign',
-      date: 'March 15, 2023',
-      time: '1:00 PM - 3:00 PM',
-      location: 'Downtown Library, Austin',
-      image: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-      description: 'Our educational campaign reached over 500 community members, teaching proper recycling techniques and the importance of reducing contamination in recycling streams.',
-    },
-  ];
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const { data } = await publicContentApi.getEvents();
+        setEvents(data.data || data);
+      } catch (e) {
+        setError('Failed to load events');
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
 
   const handleEventClick = (event) => {
     setSelectedEvent(event);
@@ -91,6 +59,9 @@ const EventsPage = () => {
     });
   };
 
+  const today = new Date();
+  const upcomingEvents = events.filter(e => (e.date ? new Date(e.date) >= today : true));
+  const pastEvents = events.filter(e => (e.date ? new Date(e.date) < today : false));
   const displayEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents;
 
   return (
@@ -134,10 +105,12 @@ const EventsPage = () => {
         {/* Events List */}
         <div className="lg:col-span-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {displayEvents.map((event) => (
+            {loading && <div>Loading events...</div>}
+            {error && <div className="text-red-600">{error}</div>}
+            {!loading && !error && displayEvents.map((event) => (
               <div 
-                key={event.id} 
-                className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105 ${selectedEvent?.id === event.id ? 'ring-2 ring-ecoGreen' : ''}`}
+                key={event.event_id} 
+                className={`bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-105 ${selectedEvent?.event_id === event.event_id ? 'ring-2 ring-ecoGreen' : ''}`}
                 onClick={() => handleEventClick(event)}
               >
                 <img 
@@ -176,7 +149,12 @@ const EventsPage = () => {
               {activeTab === 'upcoming' && (
                 <div>
                   <h3 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Register for this Event</h3>
-                  <form onSubmit={handleSubmit}>
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    publicContentApi.registerEvent({ event_id: selectedEvent.event_id, name: formData.name, email: formData.email })
+                      .then(() => alert('Thank you for registering!'))
+                      .catch(() => alert('Registration failed'));
+                  }}>
                     <div className="mb-4">
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
                       <div className="relative">

@@ -22,7 +22,10 @@ const AdminLayout = () => {
   // Main navigation items
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-    { name: 'Requests', href: '/admin/donations', icon: HandRaisedIcon },
+    { name: 'Invoices', href: '/admin/invoices', icon: DocumentTextIcon },
+    { name: 'FAQs', href: '/admin/faqs', icon: DocumentTextIcon },
+    { name: 'Events', href: '/admin/events', icon: DocumentTextIcon },
+    { name: 'Registrations', href: '/admin/event-registrations', icon: DocumentTextIcon },
     { name: 'Partnerships', href: '/admin/partnerships', icon: BuildingOfficeIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
   ];
@@ -45,8 +48,9 @@ const AdminLayout = () => {
   ];
   
   // Toggle states for collapsible sections
-  const [userManagementOpen, setUserManagementOpen] = useState(true);
-  const [contentManagementOpen, setContentManagementOpen] = useState(true);
+  const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [contentManagementOpen, setContentManagementOpen] = useState(false);
+  const [requestsOpen, setRequestsOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -90,6 +94,44 @@ const AdminLayout = () => {
                   </Link>
                 );
               })}
+            </div>
+            
+            {/* Requests Section */}
+            <div>
+              <button 
+                onClick={() => setRequestsOpen(!requestsOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Requests</span>
+                <span className="transform transition-transform duration-200">
+                  {requestsOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {requestsOpen && (
+                <div className="mt-2 space-y-1">
+                  {[
+                    { name: 'Recycling Requests', href: '/admin/requests' },
+                    { name: 'Donation Requests', href: '/admin/donations' },
+                  ].map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <HandRaisedIcon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             
             {/* User Management Section */}
@@ -211,6 +253,43 @@ const AdminLayout = () => {
                   </Link>
                 );
               })}
+            </div>
+            
+            {/* Requests Section */}
+            <div>
+              <button 
+                onClick={() => setRequestsOpen(!requestsOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Requests</span>
+                <span className="transform transition-transform duration-200">
+                  {requestsOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {requestsOpen && (
+                <div className="mt-2 space-y-1">
+                  {[
+                    { name: 'Recycling Requests', href: '/admin/requests' },
+                    { name: 'Donation Requests', href: '/admin/donations' },
+                  ].map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                      >
+                        <HandRaisedIcon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             
             {/* Content Management Section */}
