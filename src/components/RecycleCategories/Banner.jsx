@@ -24,20 +24,12 @@ const Banner = () => {
               <p className="mt-4 text-[#94a3b8] text-[19px]">
                 From paper and glass to metals and electronics responsible recycling creates a sustainable future for all.
               </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  onClick={() => setShowModal(true)}
-                  className="mt-4 bg-white text-green-700 font-semibold px-6 py-2 rounded-xl hover:bg-gray-100 transition"
-                >
-                  Recycle From here
-                </button>
-                <a
-                  href="/recycling-request"
-                  className="mt-4 bg-green-700 text-white font-semibold px-6 py-2 rounded-xl hover:bg-green-800 transition"
-                >
-                  Custom Recycling Request
-                </a>
-              </div>
+              <button
+                onClick={() => setShowModal(true)}
+                className="mt-4 bg-white text-green-700 font-semibold px-6 py-2 rounded-xl hover:bg-gray-100 transition"
+              >
+                Recycle From here
+              </button>
             </div>
 
             <div className="md:w-1/3">
