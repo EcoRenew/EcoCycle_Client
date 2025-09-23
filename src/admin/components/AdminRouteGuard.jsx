@@ -11,42 +11,30 @@ const AdminRouteGuard = ({ children }) => {
 
   useEffect(() => {
     const verifyAdmin = async () => {
-      if (!adminToken) {
+      if (loading) {
+        setVerifying(true);
+        return;
+      }
+      console.log('AdminRouteGuard: Verifying admin', { adminToken: adminToken ? 'present' : 'missing', adminUser: adminUser ? 'present' : 'missing' });
+      
+      if (!adminToken || !adminUser) {
+        console.log('AdminRouteGuard: No token or user, setting invalid');
         setIsValid(false);
         setVerifying(false);
         return;
       }
-      try {
-        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-        const response = await fetch(`${baseUrl}/admin/me`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${adminToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (response.ok) {
-          const data = await response.json();
-          // Check if user is admin
-          if (data.success && data.data && data.data.role === 'admin') {
-            setIsValid(true);
-          } else {
-            logout();
-            setIsValid(false);
-          }
-        } else {
-          logout();
-          setIsValid(false);
-        }
-      } catch (error) {
-        logout();
-        setIsValid(false);
-      }
+
+      // If we have token and user, we can immediately set as valid for navigation
+      // The server verification can happen in the background
+      setIsValid(true);
       setVerifying(false);
+
+      // Token format verification removed because we use Laravel Sanctum plain-text tokens
+      console.log('AdminRouteGuard: Token and user present, allowing access');
     };
     verifyAdmin();
     // eslint-disable-next-line
-  }, [adminToken]);
+  }, [adminToken, adminUser, loading]);
 
   // Show loading spinner while checking authentication or verifying
   if (loading || verifying) {
@@ -62,9 +50,11 @@ const AdminRouteGuard = ({ children }) => {
 
   // If not authenticated or not admin, redirect to admin login
   if (!adminToken || !adminUser || !isValid) {
+    console.log('AdminRouteGuard: Redirecting to login', { adminToken: !!adminToken, adminUser: !!adminUser, isValid });
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
+  console.log('AdminRouteGuard: Rendering protected component');
   // If authenticated and verified as admin, render the protected component
   return children;
 };

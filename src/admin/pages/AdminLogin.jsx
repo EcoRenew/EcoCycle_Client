@@ -29,12 +29,14 @@ const AdminLogin = () => {
 
     try {
       const result = await login(formData.email, formData.password);
+      
       if (result.success) {
         navigate('/admin');
       } else {
         setError(result.message);
       }
     } catch (err) {
+      console.error('Login error caught:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);

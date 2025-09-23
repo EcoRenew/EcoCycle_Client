@@ -124,6 +124,7 @@ const RecyclingRequestPage = () => {
   const [selectedItems, setSelectedItems] = useState(location.state?.selectedItems || []);
   const [expandedCategories, setExpandedCategories] = useState({});
   const [totalValue, setTotalValue] = useState(0);
+  const [totalPoints, setTotalPoints] = useState(0);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -259,7 +260,8 @@ const RecyclingRequestPage = () => {
                 units: m.units || (m.default_unit ? [m.default_unit] : (m.unit ? [m.unit] : ['kg'])),
                 defaultUnit: m.default_unit || m.unit || 'kg',
                 pricePerUnit: parseFloat(m.price_per_unit) || 0,
-                photo: m.image_url || m.photo || ''
+                photo: m.image_url || m.photo || '',
+                pointsPerKg: typeof m.points === 'number' ? m.points : (parseFloat(m.points) || 0),
               }))
           };
         });
@@ -344,6 +346,15 @@ const RecyclingRequestPage = () => {
       return sum + (item.quantity * basePrice * multiplier);
     }, 0);
     setTotalValue(total);
+    // calculate total points
+    const points = selectedItems.reduce((sum, item) => {
+      const category = materialCategories.find(cat => cat.id === item.categoryId);
+      const materialItem = category?.items.find(i => i.id === item.itemId);
+      const pointsPerKg = materialItem?.pointsPerKg || 0;
+      // assume quantity unit is kg-equivalent for points calculation
+      return sum + (item.quantity * pointsPerKg);
+    }, 0);
+    setTotalPoints(points);
   }, [selectedItems, formData.requestType]);
   
   // Handle navigation
@@ -510,6 +521,7 @@ const RecyclingRequestPage = () => {
         contact_phone: formData.phoneNumber,
         notes: `Customer: ${formData.fullName}, Preferred time: ${formData.preferredTime}`
       };
+      requestPayload.total_points = Math.round(totalPoints);
       
       // Add error handling with timeout
       const controller = new AbortController();
@@ -669,6 +681,7 @@ const RecyclingRequestPage = () => {
                             const quantity = selectedItem?.quantity || 0;
                             const currentUnit = selectedItem?.unit || item.defaultUnit;
                             const itemValue = quantity * item.pricePerUnit;
+                            const itemPoints = quantity * (item.pointsPerKg || 0);
                             
                             return (
                               <div 
@@ -687,13 +700,21 @@ const RecyclingRequestPage = () => {
                                     <div className="flex-1 min-w-0">
                                       <h4 className="font-semibold text-gray-800 text-lg truncate">{item.name}</h4>
                                       <p className="text-gray-600 text-sm truncate">{item.description}</p>
-                                      <div className="flex items-center mt-1">
+                                      <div className="flex items-center mt-1 gap-3 flex-wrap">
                                         <p className="text-green-600 text-sm font-medium">
                                           ${item.pricePerUnit.toFixed(2)} per {item.defaultUnit}
                                         </p>
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                          {item.pointsPerKg ? `${item.pointsPerKg} pts / kg` : '0 pts / kg'}
+                                        </span>
                                         {quantity > 0 && (
-                                          <span className="ml-3 text-green-700 font-medium">
+                                          <span className="ml-0 text-green-700 font-medium">
                                             Total: ${itemValue.toFixed(2)}
+                                          </span>
+                                        )}
+                                        {quantity > 0 && (
+                                          <span className="ml-0 text-amber-700 font-medium">
+                                            Points: {itemPoints.toFixed(0)}
                                           </span>
                                         )}
                                       </div>
@@ -764,6 +785,7 @@ const RecyclingRequestPage = () => {
                           const categoryData = materialCategories.find(cat => cat.id === item.categoryId);
                           const itemData = categoryData?.items.find(i => i.id === item.itemId);
                           const photo = itemData?.photo || 'https://portal.bekia-egypt.com/storage/items/xVaMZGC47cbLREMB3HzpPy9nbo6rkCttgUJ1PaMq.png';
+                          const itemPoints = (item.quantity || 0) * (itemData?.pointsPerKg || 0);
                           return (
                             <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -771,9 +793,12 @@ const RecyclingRequestPage = () => {
                                 <div className="truncate">
                                   <h4 className="font-medium text-gray-800 truncate">{item.itemName}</h4>
                                   <p className="text-sm text-gray-600 truncate">{item.categoryName}</p>
-                                  <p className="text-sm text-green-600">
-                                    {item.quantity} {item.unit} × ${item.pricePerUnit.toFixed(2)}
-                                  </p>
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm text-green-600">
+                                      {item.quantity} {item.unit} × ${item.pricePerUnit.toFixed(2)}
+                                    </p>
+                                    <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">{itemPoints.toFixed(0)} pts</span>
+                                  </div>
                                 </div>
                               </div>
                               <button
@@ -1335,6 +1360,7 @@ const RecyclingRequestPage = () => {
                            
                            const photo = itemData.photo || 'https://portal.bekia-egypt.com/storage/items/xVaMZGC47cbLREMB3HzpPy9nbo6rkCttgUJ1PaMq.png';
                            const itemTotal = item.quantity * itemData.pricePerUnit * (formData.requestType === 'donate' ? 0 : 1);
+                           const itemPoints = (item.quantity || 0) * (itemData?.pointsPerKg || 0);
                            
                            return (
                              <div key={index} className="flex justify-between items-center p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
@@ -1352,6 +1378,7 @@ const RecyclingRequestPage = () => {
                                    `$${itemTotal.toFixed(2)}`
                                  )}
                                </p>
+                               <span className="text-xs px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full">{itemPoints.toFixed(0)} pts</span>
                              </div>
                            );
                          })}
@@ -1369,6 +1396,10 @@ const RecyclingRequestPage = () => {
                            `$${totalValue.toFixed(2)}`
                          )}
                        </span>
+                     </div>
+                     <div className="flex justify-between items-center mt-2">
+                       <span className="text-lg font-semibold text-gray-800">Total Points:</span>
+                       <span className="text-2xl font-bold text-amber-600">{totalPoints.toFixed(0)} pts</span>
                      </div>
                    </div>
                    
