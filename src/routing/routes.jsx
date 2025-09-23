@@ -32,6 +32,7 @@ import DonationPage from "../pages/DonationPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
 import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
+import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
 import RequestManagement from "../admin/pages/RequestManagement";
 import RequestDetails from "../admin/pages/RequestDetails";
 import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
@@ -92,6 +93,7 @@ const router = createBrowserRouter([
 
       { path: "payment-success", element: <PaymentSuccess /> },
       { path: "auth/callback", element: <GoogleCallback /> },
+
       { path: "*", element: <NotFoundPage /> },
     ],
   },
