@@ -10,7 +10,8 @@ const DonationForm = ({
   previewUrls,
   handleRemoveImage,
   fadeIn,
-  errors
+  errors,
+  addresses
 }) => {
   const inputStyle = (hasError) =>
     `w-full px-4 py-3 border rounded-lg outline-none transition-all ${
@@ -28,88 +29,43 @@ const DonationForm = ({
 
       {/* الحقول */}
       <div className="space-y-6">
-        {/* الاسم والإيميل */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <User className="inline w-4 h-4 mr-1" />
-              Full Name *
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              required
-              className={inputStyle(errors.fullName)}
-            />
-            {errors.fullName && <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Mail className="inline w-4 h-4 mr-1" />
-              Email Address *
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-              className={inputStyle(errors.email)}
-            />
-            {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-          </div>
+        {/* التاريخ */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            <Calendar className="inline w-4 h-4 mr-1" />
+            Preferred Pickup Date *
+          </label>
+          <input
+            type="date"
+            name="pickupDate"
+            value={formData.pickupDate}
+            onChange={handleInputChange}
+            className={inputStyle(errors.pickupDate)}
+          />
+          {errors.pickupDate && <p className="text-red-500 text-sm mt-1">{errors.pickupDate}</p>}
         </div>
 
-        {/* الهاتف والتاريخ */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Phone className="inline w-4 h-4 mr-1" />
-              Phone Number *
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className={inputStyle(errors.phone)}
-            />
-            {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Calendar className="inline w-4 h-4 mr-1" />
-              Preferred Pickup Date
-            </label>
-            <input
-              type="date"
-              name="pickupDate"
-              value={formData.pickupDate}
-              onChange={handleInputChange}
-              className={inputStyle(errors.pickupDate)}
-            />
-            {errors.pickupDate && <p className="text-red-500 text-sm mt-1">{errors.pickupDate}</p>}
-          </div>
-        </div>
-
-        {/* العنوان */}
+        {/* العنوان من القائمة */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             <MapPin className="inline w-4 h-4 mr-1" />
-            Address *
+            Select Pickup Address *
           </label>
-          <textarea
-            name="address"
-            value={formData.address}
+          <select
+            name="pickup_address_id"
+            value={formData.pickup_address_id}
             onChange={handleInputChange}
             required
-            rows="3"
-            className={inputStyle(errors.address) + ' resize-none'}
-            placeholder="Please provide your complete address for pickup"
-          ></textarea>
-          {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+            className={inputStyle(errors.pickup_address_id)}
+          >
+            <option value="">Choose an address</option>
+            {addresses.map((addr) => (
+              <option key={addr.address_id} value={addr.address_id}>
+                {addr.street}, {addr.city}
+              </option>
+            ))}
+          </select>
+          {errors.pickup_address_id && <p className="text-red-500 text-sm mt-1">{errors.pickup_address_id}</p>}
         </div>
 
         {/* التصنيفات والحالة */}
@@ -206,7 +162,7 @@ const DonationForm = ({
               onChange={handleFileChange}
               className="hidden"
             />
-         {errors.photos && <p className="text-red-500 text-sm mt-2">{errors.photos}</p>}
+            {errors.photos && <p className="text-red-500 text-sm mt-2">{errors.photos}</p>}
 
             {previewUrls.length > 0 && (
               <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
