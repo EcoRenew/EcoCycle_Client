@@ -22,26 +22,34 @@ export function AdminAuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      // Simulate admin login - replace with actual API call
-      if (email === 'admin@ecocycle.com' && password === 'admin123') {
-        const token = 'admin-token-123';
-        const user = {
-          id: 1,
-          name: 'Admin User',
-          email: 'admin@ecocycle.com',
-          role: 'admin'
-        };
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+      
+      const response = await fetch(`${baseUrl}/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        const { token } = data.data;
+        const user = data.data.user;
         
         setAdminToken(token);
         setAdminUser(user);
         localStorage.setItem('adminToken', token);
         localStorage.setItem('adminUser', JSON.stringify(user));
+        localStorage.setItem('adminLastVerification', Date.now().toString());
         
         return { success: true, message: 'Login successful' };
       } else {
-        return { success: false, message: 'Invalid admin credentials' };
+        return { success: false, message: data.message || 'Invalid admin credentials' };
       }
     } catch (error) {
+      console.error('Login error:', error);
       return { success: false, message: 'Login failed. Please try again.' };
     }
   };
@@ -51,6 +59,7 @@ export function AdminAuthProvider({ children }) {
     setAdminUser(null);
     localStorage.removeItem('adminToken');
     localStorage.removeItem('adminUser');
+    localStorage.removeItem('adminLastVerification');
   };
 
   const isAuthenticated = () => {

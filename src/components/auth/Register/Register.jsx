@@ -9,7 +9,8 @@ import { useFormik } from "formik";
 import { useAuth } from "../../../context/AuthContext";
 import FormAlert from "../../common/FormAlert/FormAlert";
 import LoadingSpinner from "../../common/LoadingSpinner/LoadingSpinner";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import AuthSwitchLink from "../AuthSwitchLink/AuthSwitchLink";
 
 export default function Register() {
   let navigate = useNavigate();
@@ -143,15 +144,17 @@ export default function Register() {
                       />
                     )}
                   </form>
-                  <p className="mt-4 text-center text-sm text-gray-600 dark:text-white/60">
-                    Already have an account?
-                    <a
+                  <AuthSwitchLink>
+                    <span className="dark:text-white/60">
+                      Already have an account?
+                    </span>
+                    <Link
+                      to="/login"
                       className="font-medium text-primary-600 hover:text-primary-500"
-                      href="#"
                     >
                       Log In
-                    </a>
-                  </p>
+                    </Link>
+                  </AuthSwitchLink>
                 </div>
               </div>
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState , useEffect} from "react";
 import HeaderBar from "../components/Community/HeaderBar";
 import SearchBar from "../components/Community/SearchBar";
 import TagFilterBar from "../components/Community/TagFilterBar";
@@ -11,6 +11,7 @@ const CommunityPage = () => {
   const [newComment, setNewComment] = useState({});
   const [filter, setFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [visibleCount, setVisibleCount] = useState(6);
   const [showShareModal, setShowShareModal] = useState(false);
   const [newPost, setNewPost] = useState({
     title: "",
@@ -27,6 +28,16 @@ const CommunityPage = () => {
     "glass",
     "sustainable",
   ];
+
+  useEffect(() => {
+  const fetchPosts = async () => {
+    const response = await fetch("http://localhost:8000/api/community/posts");
+    const data = await response.json();
+    setPosts(data.posts);
+  };
+
+  fetchPosts();
+}, []);
 
   // التفاعل مع البوست
   const toggleLike = (postId) => {
@@ -124,42 +135,47 @@ const CommunityPage = () => {
     }));
   };
 
-  const handleSharePost = () => {
-    if (
-      !newPost.title.trim() ||
-      !newPost.description.trim() ||
-      newPost.images.length === 0
-    ) {
-      alert(
-        "Please fill in all required fields and upload at least one image."
-      );
-      return;
-    }
+const handleSharePost = async () => {
+  if (
+    !newPost.title.trim() ||
+    !newPost.description.trim() ||
+    newPost.images.length === 0
+  ) {
+    alert("Please fill in all required fields and upload at least one image.");
+    return;
+  }
 
-    const postToAdd = {
-      id: Date.now(),
-      author: {
-        name: "You",
-        avatar:
-          "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face",
-        username: "@you",
-      },
-      timeAgo: "now",
-      title: newPost.title,
-      description: newPost.description,
-      images: newPost.images,
-      tags: newPost.tags,
-      likes: 0,
-      isLiked: false,
-      comments: [],
-      showComments: false,
-    };
-
-    setPosts((prev) => [postToAdd, ...prev]);
-    setNewPost({ title: "", description: "", images: [], tags: [] });
-    setNewTag("");
-    setShowShareModal(false);
+  const postToSend = {
+    title: newPost.title,
+    description: newPost.description,
+    images: newPost.images,
+    author_name: "You",
+    author_avatar:
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face",
+    author_username: "@you",
+    tags: newPost.tags,
   };
+
+  try {
+    await fetch("http://localhost:8000/api/community/posts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(postToSend),
+    });
+
+    // بعد الحفظ، نجيب البوستات من جديد
+    const response = await fetch("http://localhost:8000/api/community/posts");
+    const data = await response.json();
+    setPosts(data.posts);
+  } catch (error) {
+    console.error("Error saving post:", error);
+  }
+
+  setNewPost({ title: "", description: "", images: [], tags: [] });
+  setNewTag("");
+  setShowShareModal(false);
+};
+
 
   const filteredPosts =
     filter === "all"
@@ -209,23 +225,29 @@ const CommunityPage = () => {
           />
         )}
         <div className="space-y-6">
-          {filteredPosts.map((post) => (
+          {filteredPosts.slice(0, visibleCount).map((post) => (
             <PostCard
-              key={post.id}
-              post={post}
-              toggleLike={toggleLike}
-              toggleComments={toggleComments}
-              addComment={addComment}
-              handleCommentChange={handleCommentChange}
-              newComment={newComment}
+                key={post.id}
+                post={post}
+                toggleLike={toggleLike}
+                toggleComments={toggleComments}
+                addComment={addComment}
+                handleCommentChange={handleCommentChange}
+                newComment={newComment}
             />
-          ))}
+            ))}
         </div>
+        {visibleCount < filteredPosts.length && (
         <div className="text-center mt-8">
-          <button className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg border border-gray-200 transition-colors">
+            <button
+            onClick={() => setVisibleCount((prev) => prev + 6)}
+            className="bg-white hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg border border-gray-200 transition-colors"
+            >
             Load More Projects
-          </button>
+            </button>
         </div>
+        )}
+
       </div>
       {showShareModal && (
         <PostFormModal

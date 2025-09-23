@@ -19,14 +19,38 @@ const AdminLayout = () => {
   const navigate = useNavigate();
   const { adminUser, logout } = useAdminAuth();
 
+  // Main navigation items
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: HomeIcon },
-    { name: 'User Accounts', href: '/admin/users', icon: UsersIcon },
-    { name: 'Content Management', href: '/admin/content', icon: DocumentTextIcon },
-    { name: 'Donation Requests', href: '/admin/donations', icon: HandRaisedIcon },
+    { name: 'Invoices', href: '/admin/invoices', icon: DocumentTextIcon },
+    { name: 'FAQs', href: '/admin/faqs', icon: DocumentTextIcon },
+    { name: 'Events', href: '/admin/events', icon: DocumentTextIcon },
+    { name: 'Registrations', href: '/admin/event-registrations', icon: DocumentTextIcon },
     { name: 'Partnerships', href: '/admin/partnerships', icon: BuildingOfficeIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
   ];
+  
+  // Content management categories
+  const contentCategories = [
+    { name: 'All Content', href: '/admin/content', icon: DocumentTextIcon },
+    { name: 'Articles', href: '/admin/content/articles', icon: DocumentTextIcon },
+    { name: 'Categories', href: '/admin/categories', icon: DocumentTextIcon },
+    { name: 'Materials', href: '/admin/materials', icon: DocumentTextIcon },
+  ];
+  
+  // User management categories
+  const userCategories = [
+    { name: 'All Users', href: '/admin/users', icon: UsersIcon },
+    { name: 'Customers', href: '/admin/users/customers', icon: UsersIcon },
+    { name: 'Factories', href: '/admin/users/factories', icon: UsersIcon },
+    { name: 'Collectors', href: '/admin/users/collectors', icon: UsersIcon },
+    { name: 'Admins', href: '/admin/users/admins', icon: UsersIcon },
+  ];
+  
+  // Toggle states for collapsible sections
+  const [userManagementOpen, setUserManagementOpen] = useState(false);
+  const [contentManagementOpen, setContentManagementOpen] = useState(false);
+  const [requestsOpen, setRequestsOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -49,27 +73,149 @@ const AdminLayout = () => {
               <XMarkIcon className="h-6 w-6" />
             </button>
           </div>
-          <nav className="flex-1 px-4 py-4 space-y-2">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-ecoGreen text-white'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 px-4 py-4 space-y-4">
+            {/* Main navigation items */}
+            <div className="space-y-2">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      isActive
+                        ? 'bg-ecoGreen text-white'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+            
+            {/* Requests Section */}
+            <div>
+              <button 
+                onClick={() => setRequestsOpen(!requestsOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Requests</span>
+                <span className="transform transition-transform duration-200">
+                  {requestsOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {requestsOpen && (
+                <div className="mt-2 space-y-1">
+                  {[
+                    { name: 'Recycling Requests', href: '/admin/requests' },
+                    { name: 'Donation Requests', href: '/admin/donations' },
+                  ].map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <HandRaisedIcon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            {/* User Management Section */}
+            <div>
+              <button 
+                onClick={() => setUserManagementOpen(!userManagementOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>User Management</span>
+                <span className="transform transition-transform duration-200">
+                  {userManagementOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {/* Content Management Section */}
+              <button 
+                onClick={() => setContentManagementOpen(!contentManagementOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Content Management</span>
+                <span className="transform transition-transform duration-200">
+                  {contentManagementOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {contentManagementOpen && (
+                <div className="mt-2 space-y-1">
+                  {contentCategories.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                      >
+                        <item.icon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+              
+              {userManagementOpen && (
+                <div className="mt-2 space-y-1">
+                  {userCategories.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                        onClick={() => setSidebarOpen(false)}
+                    >
+                      <item.icon className="mr-3 h-5 w-5" />
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
+              )}
+            </div>
           </nav>
           <div className="border-t border-gray-200 p-4">
+            {/* Admin Profile */}
+            <div className="flex items-center mb-4 px-2">
+              <div className="flex-shrink-0">
+                <div className="h-10 w-10 rounded-full bg-ecoGreen text-white flex items-center justify-center">
+                  {adminUser?.name ? adminUser.name.charAt(0).toUpperCase() : 'A'}
+                </div>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-700">{adminUser?.name || 'Admin'}</p>
+                <p className="text-xs text-gray-500 truncate">{adminUser?.email || 'admin@ecocycle.com'}</p>
+              </div>
+            </div>
+            
             <button
               onClick={handleLogout}
               className="flex items-center w-full px-3 py-2 text-sm font-medium text-gray-700 rounded-md hover:bg-gray-100 hover:text-red-600 transition-colors"
@@ -87,24 +233,132 @@ const AdminLayout = () => {
           <div className="flex h-16 items-center px-4 border-b border-gray-200">
             <h1 className="text-xl font-bold text-ecoGreen">Admin Panel</h1>
           </div>
-          <nav className="flex-1 px-4 py-4 space-y-2">
-            {navigation.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                    isActive
-                      ? 'bg-ecoGreen text-white'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
-                  }`}
-                >
-                  <item.icon className="mr-3 h-5 w-5" />
-                  {item.name}
-                </Link>
-              );
-            })}
+          <nav className="flex-1 px-4 py-4 space-y-4">
+            {/* Main navigation items */}
+            <div className="space-y-2">
+              {navigation.map((item) => {
+                const isActive = location.pathname === item.href;
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                      isActive
+                        ? 'bg-ecoGreen text-white'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                    }`}
+                  >
+                    <item.icon className="mr-3 h-5 w-5" />
+                    {item.name}
+                  </Link>
+                );
+              })}
+            </div>
+            
+            {/* Requests Section */}
+            <div>
+              <button 
+                onClick={() => setRequestsOpen(!requestsOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Requests</span>
+                <span className="transform transition-transform duration-200">
+                  {requestsOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {requestsOpen && (
+                <div className="mt-2 space-y-1">
+                  {[
+                    { name: 'Recycling Requests', href: '/admin/requests' },
+                    { name: 'Donation Requests', href: '/admin/donations' },
+                  ].map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                      >
+                        <HandRaisedIcon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            {/* Content Management Section */}
+            <div>
+              <button 
+                onClick={() => setContentManagementOpen(!contentManagementOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>Content Management</span>
+                <span className="transform transition-transform duration-200">
+                  {contentManagementOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {contentManagementOpen && (
+                <div className="mt-2 space-y-1">
+                  {contentCategories.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center pl-8 pr-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                      >
+                        <item.icon className="mr-3 h-4 w-4" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            {/* User Management Section */}
+            <div>
+              <button 
+                onClick={() => setUserManagementOpen(!userManagementOpen)}
+                className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-100 rounded-md"
+              >
+                <span>User Management</span>
+                <span className="transform transition-transform duration-200">
+                  {userManagementOpen ? '▼' : '►'}
+                </span>
+              </button>
+              {userManagementOpen && (
+                <div className="mt-2 space-y-1">
+                  {userCategories.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+                          isActive
+                            ? 'bg-ecoGreen text-white'
+                            : 'text-gray-700 hover:bg-gray-100 hover:text-ecoGreen'
+                        }`}
+                      >
+                        <item.icon className="mr-3 h-5 w-5" />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </nav>
           <div className="border-t border-gray-200 p-4">
             <button
@@ -137,8 +391,14 @@ const AdminLayout = () => {
               </h2>
             </div>
             <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <div className="flex items-center text-sm text-gray-500">
-                Welcome back, {adminUser?.name || 'Admin'}
+              <div className="flex items-center space-x-3">
+                <div className="flex flex-col items-end text-sm">
+                  <span className="font-medium text-gray-700">{adminUser?.name || 'Admin'}</span>
+                  <span className="text-xs text-gray-500">{adminUser?.email || 'admin@ecocycle.com'}</span>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-ecoGreen text-white flex items-center justify-center">
+                  {adminUser?.name ? adminUser.name.charAt(0).toUpperCase() : 'A'}
+                </div>
               </div>
             </div>
           </div>
