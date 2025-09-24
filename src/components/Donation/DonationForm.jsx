@@ -12,6 +12,7 @@ const DonationForm = ({
   fadeIn,
   errors,
   addresses
+
 }) => {
   const inputStyle = (hasError) =>
     `w-full px-4 py-3 border rounded-lg outline-none transition-all ${
@@ -29,6 +30,7 @@ const DonationForm = ({
 
       {/* الحقول */}
       <div className="space-y-6">
+
         {/* التاريخ */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -66,6 +68,7 @@ const DonationForm = ({
             ))}
           </select>
           {errors.pickup_address_id && <p className="text-red-500 text-sm mt-1">{errors.pickup_address_id}</p>}
+
         </div>
 
         {/* التصنيفات والحالة */}
@@ -162,7 +165,7 @@ const DonationForm = ({
               onChange={handleFileChange}
               className="hidden"
             />
-            {errors.photos && <p className="text-red-500 text-sm mt-2">{errors.photos}</p>}
+            {errors.photos && <p className="text-red-500 text-sm mt-2">{errors.photos}</p>
 
             {previewUrls.length > 0 && (
               <div className="mt-4 grid grid-cols-2 md:grid-cols-3 gap-4">
