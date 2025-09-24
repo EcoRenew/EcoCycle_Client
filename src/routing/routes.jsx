@@ -28,6 +28,11 @@ import CommunityPage from "../pages/CommunityPage";
 import AboutPage from "../pages/AboutPage";
 import ContactPage from "../pages/ContactPage";
 import RecyclingRequestPage from "../pages/RecyclingRequestPage";
+import UserPage from "../pages/UserPage";
+import PaymentSuccess from "../components/PaymentSuccess/PaymentSuccess";
+import GoogleCallback from "../components/GoogleCallback/GoogleCallback";
+import RequestManagement from "../admin/pages/RequestManagement";
+import RequestDetails from "../admin/pages/RequestDetails";
 import DonationPage from "../pages/DonationPage";
 import GuestRoute from "../components/GuestRoute/GuestRoute";
 import UserPage from "../pages/UserPage";
@@ -39,7 +44,10 @@ import DashboardLayout from "../components/userDashboard/DashboardLayout";
 import SchedulePage from "../pages/SchedulePage";
 import DonationsPage from "../pages/DonationsPage ";
 import ImpactPage from "../pages/ImpactPage";
+import ProtectedRoute from "../components/ProtectedRoute/ProtectedRoute";
+
 import ProtectedRoute from "../components/rotectedRoute";
+
 const router = createBrowserRouter([
   {
     path: "/",

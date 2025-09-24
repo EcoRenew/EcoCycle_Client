@@ -3,15 +3,19 @@ import DonationHeader from '../components/Donation/DonationHeader';
 import DonationForm from '../components/Donation/DonationForm';
 import DonationNextSteps from '../components/Donation/DonationNextSteps';
 import CharityPartners from '../components/Donation/CharityPartners';
+import { useAuth } from '../context/AuthContext';
 
 const DonationPage = () => {
   const [fadeIn, setFadeIn] = useState(false);
+  const [addresses, setAddresses] = useState([]);
+  const [errors, setErrors] = useState({});
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const { user, token } = useAuth();
 
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    address: '',
+    pickup_address_id: '',
+
     itemCategory: '',
     condition: '',
     description: '',
@@ -35,6 +39,27 @@ const DonationPage = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (!token) return;
+
+    fetch("http://localhost:8000/api/addresses", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setAddresses(data.addresses || []);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch addresses:", err);
+      });
+  }, [token]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 //   const handleInputChange = (e) => {
 //     const { name, value } = e.target;
 //     setFormData(prev => ({ ...prev, [name]: value }));
@@ -116,6 +141,7 @@ const handleInputChange = (e) => {
   const validateForm = () => {
     const newErrors = {};
 
+    if (!formData.pickup_address_id) newErrors.pickup_address_id = "Please select an address";
     if (!formData.fullName.trim()) newErrors.fullName = "Full name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid";
@@ -132,17 +158,18 @@ const handleInputChange = (e) => {
     if (!formData.description.trim()) newErrors.description = "Description is required";
 
     if (!formData.pickupDate) {
-    newErrors.pickupDate = "Pickup date is required";
+      newErrors.pickupDate = "Pickup date is required";
     } else {
-    const selectedDate = new Date(formData.pickupDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+      const selectedDate = new Date(formData.pickupDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
-    if (selectedDate < today) {
+      if (selectedDate < today) {
         newErrors.pickupDate = "Pickup date cannot be in the past";
-    } else if (selectedDate.getDay() === 5) {
+      } else if (selectedDate.getDay() === 5) {
         newErrors.pickupDate = "Pickup is not available on Fridays";
-    }
+      }
+
     }
 
     if (uploadedFiles.length === 0) {
@@ -160,12 +187,21 @@ const handleInputChange = (e) => {
       return;
     }
 
-    setErrors({});
+    if (!user) {
+      alert("Please log in before submitting a donation.");
+      return;
+    }
 
     const formDataToSend = new FormData();
-    Object.entries(formData).forEach(([key, value]) => {
-      formDataToSend.append(key, value);
-    });
+    formDataToSend.append("user_id", user.user_id);
+    formDataToSend.append("pickup_address_id", formData.pickup_address_id);
+    formDataToSend.append("item_category", formData.itemCategory);
+    formDataToSend.append("condition", formData.condition);
+    formDataToSend.append("description", formData.description);
+    formDataToSend.append("pickup_date", formData.pickupDate);
+    formDataToSend.append("additional_notes", formData.additionalNotes);
+
+
     uploadedFiles.forEach((file, index) => {
       formDataToSend.append(`photos[${index}]`, file);
     });
@@ -232,6 +268,8 @@ const handleInputChange = (e) => {
           handleRemoveImage={handleRemoveImage}
           errors={errors}
           fadeIn={fadeIn}
+          addresses={addresses}
+
         />
 
         <DonationNextSteps />
