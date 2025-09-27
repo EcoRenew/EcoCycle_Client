@@ -40,6 +40,7 @@ import SchedulePage from "../pages/SchedulePage";
 import DonationsPage from "../pages/DonationsPage ";
 import ImpactPage from "../pages/ImpactPage";
 import ProtectedRoute from "../components/rotectedRoute";
+import PaymentCancel from "../components/PaymentCancel/PaymentCancel";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -91,6 +92,7 @@ const router = createBrowserRouter([
       { path: "customer-details", element: <RecyclingRequestPage /> },
 
       { path: "payment-success", element: <PaymentSuccess /> },
+      { path: "payment-cancel", element: <PaymentCancel /> },
       { path: "auth/callback", element: <GoogleCallback /> },
       { path: "*", element: <NotFoundPage /> },
     ],
